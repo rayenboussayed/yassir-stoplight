@@ -2548,82 +2548,251 @@ paths:
                           arrivalTime: "2024-06-10T09:30:00Z"
 
                         paymentMethod: "CASH"
-                    requests: []
-                with-requests:
-                  summary: Example with requests
-                  value:
-                    success: true
-                    requests:
-                      - id: "trip001"
-                        time: "2024-06-10T09:30:00Z"
-                        pickup:
-                          city: "Blida"
-                          departureTime: "2024-06-10T09:30:00Z"
-
-                        destination:
-                          city: "Oran"
-                          arrivalTime: "2024-06-10T09:30:00Z"
-
-                        remainingSeats: 2
-                     
-                    trips: []
-                with-requests-and-trips:
-                  summary: Example with requests and trips
-                  value:
-                    success: true
-                    requests:
-                      - id: "trip001"
-                        tripUid: "XYZXYZXYZ"
-                        joined: true
-                        pickup:
-                          city: "Blida"
-                          departureTime: "2024-06-10T09:30:00Z"
-
-                        destination:
-                          city: "Oran"
-                          arrivalTime: "2024-06-10T09:30:00Z"
-
-                        remainingSeats: 2
-                     
-                    trips:
-                      - id: "trip001"
-                        time: "2024-06-10T09:30:00Z"
-                        pickup:
-                          address: "123 Main St"
-                          city: "Blida"
-                        destination:
-                          address: "456 Elm St"
-                          city: "Oran"
-                        paymentMethod: "CASH"
-                        price: 2500
-                        currency: DZD
-                        remainingSeats: 2
-                        driverProfile: 
-                          id: "driver001"
-                          phone: "+213600000000"
-                          picture: "https://example.com/driver001.jpg"
-                          name: "John Doe"
-                          rating: 4.8
-                          car:    
-                            make: "Toyota"
-                            model: "Corolla"
-                            color: "Blue"
-                            immat: "123-XYZ"
-                      - id: "trip002"
-                        time: "2024-06-10T10:00:00Z"
-                        pickup:
-                          address: "123 Main St"
-                          city: "Blida"
-                        destination:
-                          address: "456 Elm St"
-                          city: "Oran"
-                        paymentMethod: "CASH"
                 no-data:
                   summary: Example with no trips and requests
                   value:
                     success: true
                     trips: []
+        '400':
+          description: Bad request, invalid or missing parameters
+          content:
+            application/json:
+              examples:
+                bad_request:
+                  summary: Example bad request response
+                  value:
+                    success: false
+                    trips: null
+                    errorMessageKey: "REQUIRED_FIELD_ERROR"
+                    errorMessage: "Invalid or missing parameters"
+        '500':
+          description: Server error
+          content:
+            application/json:
+              examples:
+                search_error:
+                  summary: Example error response
+                  value:
+                    success: false
+                    trips: null
+                    errorMessageKey: "ERROR_SEARCH_TRIPS"
+                    errorMessage: "Error searching for trips"
+  /intercity/v2/search-trips:
+    post:
+      summary: Search available intercity trips. actual path will be <baseurl>/b2c/rider/
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                datetime:
+                  type: string
+                  format: date-time
+                  description: Date and time for the trip (ISO 8601 format)
+                pickup:
+                  type: string
+                  description: Pickup location path
+                destination:
+                  type: string
+                  description: Destination location path
+                seats:
+                  type: number
+                  description: Number of seats required
+                isPrivate:
+                  type: boolean
+                  description: If rider is looking for empty car
+                location:
+                  type: object
+                  description: Location of user
+                  properties:
+                    lat:
+                      type: number
+                    lng:
+                      type: number
+                      
+            
+            examples:
+              search-request:
+                summary: Example search request
+                value:
+                  datetime: "2024-06-10T09:00:00Z"
+                  pickup: "0,192756,1258647"
+                  destination: "0,192756,1258647"
+                  seats: 2
+                  isPrivate: true
+                  location:
+                    lat: 3.123
+                    lng: 2.123
+      responses:
+        '200':
+          description: Successful response with available trips
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  trips:
+                    type: object
+                    description: >-
+                      Trips grouped by day. Each key is a date string in
+                      "YYYY-MM-DD" format covering the next 14 days from the
+                      search date, and each value is an array of trip
+                      objects for that day, in the same shape as the v1 flat
+                      trips array.
+                    additionalProperties:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                          tripUid:
+                            type: string
+                          pickup:
+                            type: object
+                            properties:
+                              address:
+                                type: string
+                              city:
+                                type: string
+                              distance:
+                                type: number
+                              departureTime:
+                                type: string
+                                format: date-time
+                              arrivalTime:
+                                type: string
+                                format: date-time
+                          destination:
+                            type: object
+                            properties:
+                              address:
+                                type: string
+                              city:
+                                type: string
+                          paymentMethod:
+                            type: string
+                          price:
+                            type: number
+                          currency:
+                            type: string
+                          currencyLabel:
+                            type: string
+                          remainingSeats:
+                            type: number
+                          driverProfile:
+                            type: object
+                            properties:
+                              id:
+                                type: string
+                              phone:
+                                type: string
+                              picture:
+                                type: string
+                              name:
+                                type: string
+                              rating:
+                                type: number
+                              car:
+                                type: object
+                                properties:
+                                  make: 
+                                    type: string
+                                  model: 
+                                    type: string
+                                  color: 
+                                    type: string
+                                  immat:
+                                    type: string
+                          
+
+                  requests:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        joined:
+                          type: boolean
+                        pickup:
+                          type: object
+                          properties:
+                            departureTime:
+                              type: string
+                              format: date-time
+                            city:
+                              type: string
+                        destination:
+                          type: object
+                          properties:
+                            arrivalTime:
+                              type: string
+                              format: date-time
+                            city:
+                              type: string
+                        
+
+              examples:
+                with-trips:
+                  summary: Example with trips
+                  value:
+                    success: true
+                    trips:
+                      "2024-06-10":
+                        - id: "trip001"
+                          tripUid: "XYZXYZXYZ"
+                          pickup:
+                            address: "123 Main St"
+                            city: "Blida"
+                            distance: 1200
+                            departureTime: "2024-06-10T09:30:00Z"
+                          destination:
+                            address: "456 Elm St"
+                            city: "Oran"
+                            arrivalTime: "2024-06-10T09:30:00Z"
+
+                          paymentMethod: "CASH"
+                          price: 2500
+                          currency: "DZD"
+                          currencyLabel: "DZ"
+                          remainingSeats: 2
+                          driverProfile: 
+                            id: "driver001"
+                            phone: "+213600000000"
+                            picture: "https://example.com/driver001.jpg"
+                            name: "John Doe"
+                            rating: 4.8
+                            car:    
+                              make: "Toyota"
+                              model: "Corolla"
+                              color: "Blue"
+                              immat: "123-XYZ"
+                        - id: "trip002"
+                          tripUid: "XYZXYZXYZ"
+                          pickup:
+                            address: "123 Main St"
+                            city: "Blida"
+                            distance: 1200
+                            departureTime: "2024-06-10T09:30:00Z"
+
+                          destination:
+                            address: "456 Elm St"
+                            city: "Oran"
+                            arrivalTime: "2024-06-10T09:30:00Z"
+
+                          paymentMethod: "CASH"
+                      "2024-06-11": []
                     requests: []
+                no-data:
+                  summary: Example with no trips
+                  value:
+                    success: true
+                    trips: null
         '400':
           description: Bad request, invalid or missing parameters
           content:
