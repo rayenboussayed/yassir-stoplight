@@ -92,23 +92,22 @@ paths:
                       price:
                         type: number
                         example: 2500
-                  
 
                       riderPay:
                         type: object
                         properties:
                           amount:
-                            type: number 
+                            type: number
                             example: 2500
-                              
+
                           amountWithoutTax:
-                            type: number 
-                            example: 2000             
-                          tax: 
+                            type: number
+                            example: 2000
+                          tax:
                             type: array
                             items:
-                              type: object    
-                              properties:             
+                              type: object
+                              properties:
                                 label:
                                   type: string
                                   example: TAX1
@@ -281,7 +280,7 @@ paths:
   /intercity/v1/checkTripConflict:
     post:
       summary: Checks the trip conflict. actual path will be <baseurl>/b2c/driver/
-      
+
       security:
         - bearerAuth: []
       parameters:
@@ -319,7 +318,7 @@ paths:
                       description: Level 1 path of the city (wilaya)
                 destination:
                   type: string
-               
+
             examples:
               trip:
                 summary: Example
@@ -348,7 +347,7 @@ paths:
                   value:
                     success: true
                     message: Trip time available
-               
+
         "400":
           description: Bad request - Invalid parameters or trip cannot be canceled
           content:
@@ -360,7 +359,7 @@ paths:
                     success: false
                     errorMessageKey: REQUIRED_FIELD_ERROR
                     errorMessage: Trip time is required
-               
+
         "403":
           description: Time conflict found
           content:
@@ -372,8 +371,7 @@ paths:
                     success: false
                     errorMessageKey: TIME_CONFLICT_ERROR
                     errorMessage: You have an overlapping trip scheduled for this time
-               
-        
+
         "500":
           description: Server error
           content:
@@ -494,7 +492,7 @@ paths:
                     success: false
                     errorMessageKey: ERROR_CANCEL_TRIP
                     errorMessage: Error canceling the intercity trip
-  
+
   /intercity/v1/trips:
     get:
       summary: Get driver's upcoming or past intercity trips with bookings
@@ -669,19 +667,6 @@ paths:
                               phone: "+213600000001"
                               rating: 4.5
                               reviewCount: 10
-                          - id: "6550f8a8e4b0a2f9c8b0e1a6"
-                            seats: 1
-                            riderProfile:
-                              id: "6550f8a8e4b0a2f9c8b0e1a7"
-                              rider: "6550f8a8e4b0a2f9c8b0e1a7"
-                              email: rider2@example.com
-                              fullName: Bob Johnson
-                              firstName: Bob
-                              lastName: Johnson
-                              gender: male
-                              phone: "+213600000002"
-                              rating: 4.7
-                              reviewCount: 8
                 past-trips-paginated:
                   summary: Past trips with cursor-based pagination
                   value:
@@ -690,237 +675,6 @@ paths:
                       - id: "6550f8a8e4b0a2f9c8b0e1a8"
                         status: FINISHED
                         tripUid: XYZ123
-                        pickup:
-                          address: Avenue Aouati Mostefa, Constantine
-                          city: Constantine
-                          distance: null
-                          departureTime: "2026-02-08T14:00:00.000Z"
-                          lat: 36.365
-                          lng: 6.6147
-                        destination:
-                          address: Boulevard du 1er Novembre, Annaba
-                          arrivalTime: "2026-02-08T16:00:00.000Z"
-                          city: Annaba
-                          lat: 36.9
-                          lng: 7.7667
-                        price: 800
-                        maxSeats: 4
-                        currency: DZD
-                        currencyLabel: DA
-                        bookings: []
-                      - id: "6550f8a8e4b0a2f9c8b0e1a9"
-                        status: FINISHED
-                        tripUid: XYZ1234
-                        pickup:
-                          address: Avenue Aouati Mostefa, Constantine
-                          city: Constantine
-                          distance: null
-                          departureTime: "2026-02-08T14:00:00.000Z"
-                          lat: 36.365
-                          lng: 6.6147
-                        destination:
-                          address: Boulevard du 1er Novembre, Annaba
-                          arrivalTime: "2026-02-08T16:00:00.000Z"
-                          city: Annaba
-                          lat: 36.9
-                          lng: 7.7667
-                        price: 800
-                        maxSeats: 4
-                        currency: DZD
-                        currencyLabel: DA
-                        bookings: []
-                      - id: "6550f8a8e4b0a2f9c8b0e1a0"
-                        status: FINISHED
-                        tripUid: XYZ1235
-                        pickup:
-                          address: Avenue Aouati Mostefa, Constantine
-                          city: Constantine
-                          distance: null
-                          departureTime: "2026-02-08T14:00:00.000Z"
-                          lat: 36.365
-                          lng: 6.6147
-                        destination:
-                          address: Boulevard du 1er Novembre, Annaba
-                          arrivalTime: "2026-02-08T16:00:00.000Z"
-                          city: Annaba
-                          lat: 36.9
-                          lng: 7.7667
-                        price: 800
-                        maxSeats: 4
-                        currency: DZD
-                        currencyLabel: DA
-                        bookings: []
-                      - id: "6550f8a8e4b0a2f9c8b0e1a1"
-                        status: FINISHED
-                        tripUid: XYZ1235
-                        pickup:
-                          address: Avenue Aouati Mostefa, Constantine
-                          city: Constantine
-                          distance: null
-                          departureTime: "2026-02-08T14:00:00.000Z"
-                          lat: 36.365
-                          lng: 6.6147
-                        destination:
-                          address: Boulevard du 1er Novembre, Annaba
-                          arrivalTime: "2026-02-08T16:00:00.000Z"
-                          city: Annaba
-                          lat: 36.9
-                          lng: 7.7667
-                        price: 800
-                        maxSeats: 4
-                        currency: DZD
-                        currencyLabel: DA
-                        bookings: []
-                      - id: "6550f8a8e4b0a2f9c8b0e1a2"
-                        status: FINISHED
-                        tripUid: XYZ1237
-                        pickup:
-                          address: Avenue Aouati Mostefa, Constantine
-                          city: Constantine
-                          distance: null
-                          departureTime: "2026-02-08T14:00:00.000Z"
-                          lat: 36.365
-                          lng: 6.6147
-                        destination:
-                          address: Boulevard du 1er Novembre, Annaba
-                          arrivalTime: "2026-02-08T16:00:00.000Z"
-                          city: Annaba
-                          lat: 36.9
-                          lng: 7.7667
-                        price: 800
-                        maxSeats: 4
-                        currency: DZD
-                        currencyLabel: DA
-                        bookings: []
-                      - id: "6550f8a8e4b0a2f9c8b0e1a3"
-                        status: FINISHED
-                        tripUid: XYZ12358
-                        pickup:
-                          address: Avenue Aouati Mostefa, Constantine
-                          city: Constantine
-                          distance: null
-                          departureTime: "2026-02-08T14:00:00.000Z"
-                          lat: 36.365
-                          lng: 6.6147
-                        destination:
-                          address: Boulevard du 1er Novembre, Annaba
-                          arrivalTime: "2026-02-08T16:00:00.000Z"
-                          city: Annaba
-                          lat: 36.9
-                          lng: 7.7667
-                        price: 800
-                        maxSeats: 4
-                        currency: DZD
-                        currencyLabel: DA
-                        bookings: []
-                      - id: "6550f8a8e4b0a2f9c8b0e1a5"
-                        status: FINISHED
-                        tripUid: XYZ1239
-                        pickup:
-                          address: Avenue Aouati Mostefa, Constantine
-                          city: Constantine
-                          distance: null
-                          departureTime: "2026-02-08T14:00:00.000Z"
-                          lat: 36.365
-                          lng: 6.6147
-                        destination:
-                          address: Boulevard du 1er Novembre, Annaba
-                          arrivalTime: "2026-02-08T16:00:00.000Z"
-                          city: Annaba
-                          lat: 36.9
-                          lng: 7.7667
-                        price: 800
-                        maxSeats: 4
-                        currency: DZD
-                        currencyLabel: DA
-                        bookings: []
-                      - id: "6550f8a8e4b0a2f9c8b0e1a6"
-                        status: FINISHED
-                        tripUid: XYZ123500
-                        pickup:
-                          address: Avenue Aouati Mostefa, Constantine
-                          city: Constantine
-                          distance: null
-                          departureTime: "2026-02-08T14:00:00.000Z"
-                          lat: 36.365
-                          lng: 6.6147
-                        destination:
-                          address: Boulevard du 1er Novembre, Annaba
-                          arrivalTime: "2026-02-08T16:00:00.000Z"
-                          city: Annaba
-                          lat: 36.9
-                          lng: 7.7667
-                        price: 800
-                        maxSeats: 4
-                        currency: DZD
-                        currencyLabel: DA
-                        bookings: []
-                      - id: "6550f8a8e4b0a2f9c8b0e1a7"
-                        status: FINISHED
-                        tripUid: XYZ123511
-                        pickup:
-                          address: Avenue Aouati Mostefa, Constantine
-                          city: Constantine
-                          distance: null
-                          departureTime: "2026-02-08T14:00:00.000Z"
-                          lat: 36.365
-                          lng: 6.6147
-                        destination:
-                          address: Boulevard du 1er Novembre, Annaba
-                          arrivalTime: "2026-02-08T16:00:00.000Z"
-                          city: Annaba
-                          lat: 36.9
-                          lng: 7.7667
-                        price: 800
-                        maxSeats: 4
-                        currency: DZD
-                        currencyLabel: DA
-                        bookings: []
-                      - id: "6550f8a8e4b0a2f9c8b0e1ab"
-                        status: FINISHED
-                        tripUid: XYZ123588
-                        pickup:
-                          address: Avenue Aouati Mostefa, Constantine
-                          city: Constantine
-                          distance: null
-                          departureTime: "2026-02-08T14:00:00.000Z"
-                          lat: 36.365
-                          lng: 6.6147
-                        destination:
-                          address: Boulevard du 1er Novembre, Annaba
-                          arrivalTime: "2026-02-08T16:00:00.000Z"
-                          city: Annaba
-                          lat: 36.9
-                          lng: 7.7667
-                        price: 800
-                        maxSeats: 4
-                        currency: DZD
-                        currencyLabel: DA
-                        bookings: []
-                      - id: "6550f8a8e4b0a2f9c8b0e1ac"
-                        status: FINISHED
-                        tripUid: XYZ123544
-                        pickup:
-                          address: Avenue Aouati Mostefa, Constantine
-                          city: Constantine
-                          distance: null
-                          departureTime: "2026-02-08T14:00:00.000Z"
-                          lat: 36.365
-                          lng: 6.6147
-                        destination:
-                          address: Boulevard du 1er Novembre, Annaba
-                          arrivalTime: "2026-02-08T16:00:00.000Z"
-                          city: Annaba
-                          lat: 36.9
-                          lng: 7.7667
-                        price: 800
-                        maxSeats: 4
-                        currency: DZD
-                        currencyLabel: DA
-                        bookings: []
-                      - id: "6550f8a8e4b0a2f9c8b0e1ah"
-                        status: FINISHED
-                        tripUid: XYZ123577
                         pickup:
                           address: Avenue Aouati Mostefa, Constantine
                           city: Constantine
@@ -974,7 +728,7 @@ paths:
                     status: false
                     errorMessageKey: ERROR_FETCH_DRIVER_TRIPS
                     errorMessage: Error fetching driver trips
-  
+
   /intercity/v1/trip/{tripId}:
     get:
       summary: Get trip details with all bookings
@@ -1187,14 +941,14 @@ paths:
                               type: object
                               properties:
                                 amount:
-                                  type: number 
+                                  type: number
                                 amountWithTax:
-                                  type: number              
-                                tax: 
+                                  type: number
+                                tax:
                                   type: array
                                   items:
-                                    type: object    
-                                    properties:             
+                                    type: object
+                                    properties:
                                       label:
                                         type: string
                                       amount:
@@ -1271,21 +1025,6 @@ paths:
                             phone: "+213600000001"
                             rating: 4.5
                             reviewCount: 10
-                        - id: "6550f8a8e4b0a2f9c8b0e1a6"
-                          seats: 1
-                          tax:
-                              - label: "Stamp Duty"
-                                amount: 50
-                          riderProfile:
-                            id: "6550f8a8e4b0a2f9c8b0e1a7"
-                            rider: "6550f8a8e4b0a2f9c8b0e1a7"
-                            email: "rider2@example.com"
-                            fullName: "Bob Johnson"
-                            gender: "male"
-                            phone: "+213600000002"
-                            rating: 4.7
-                            reviewCount: 8
-
                 no-bookings:
                   summary: Trip with no bookings
                   value:
@@ -1400,7 +1139,7 @@ paths:
                     lng:
                       type: number
                       description: Longitude of the pickup location
-                
+
             examples:
               basic:
                 summary: Example success request
@@ -1410,7 +1149,7 @@ paths:
                     lat: 36.752887
                     lng: 3.042048
 
-                  
+
       security:
         - bearerAuth: []
       responses:
@@ -1425,7 +1164,7 @@ paths:
                     type: boolean
                   message:
                     type: string
-                 
+
               examples:
                 success:
                   summary: Example successful response
@@ -1437,8 +1176,8 @@ paths:
                   value:
                     success: true
                     message: "Location is not valid"
-                   
-  
+
+
         '400':
           description: Bad request
           content:
@@ -1450,8 +1189,8 @@ paths:
                     success: false
                     errorMessageKey: "REQUIRED_FIELD_ERROR"
                     errorMessage: "Pickup path is required"
-                
-  
+
+
         '500':
           description: Server error
           content:
@@ -1550,7 +1289,7 @@ paths:
                         items:
                           type: object
                           properties:
-                            id: 
+                            id:
                               type: string
                             riderProfile:
                               type: object
@@ -1559,13 +1298,13 @@ paths:
                                   type: number
                                 label:
                                   type: string
-                                
+
                       appliedTaxesRider:
                         type: array
                         items:
                           type: object
                           properties:
-                            id: 
+                            id:
                               type: string
                             riderProfile:
                               type: object
@@ -1574,7 +1313,7 @@ paths:
                                   type: number
                                 label:
                                   type: string
-                     
+
                       yassirFee:
                         type: object
                         properties:
@@ -1584,10 +1323,7 @@ paths:
                             type: number
                       netEarning:
                         type: number
-                      
-            
-            
-                 
+
               examples:
                 success:
                   summary: Example success response
@@ -1599,19 +1335,19 @@ paths:
                      riderPay: 440
                      yassirFee: {percent: 20, amount: 200}
                      netEarning: 900
-                     appliedTaxesRider: 
+                     appliedTaxesRider:
                       - label: "Stamp"
                         amount: 20
                       - label: "Fix Tax"
                         amount: 10
-                        
-                     appliedTaxesDriver: 
+
+                     appliedTaxesDriver:
                       - label: "Flat Tax"
                         amount: 5
 
                      driverPotentialEarning: 1000
-                    
-                
+
+
         '400':
           description: Bad request, invalid or missing parameters
           content:
@@ -1665,7 +1401,7 @@ paths:
                 bookingId:
                   type: string
                   description: The ID of the booking to cancel
-                
+
             examples:
               cancel-request:
                 summary: Example cancel request
@@ -1685,15 +1421,15 @@ paths:
                     type: boolean
                   message:
                     type: string
-                 
+
               examples:
                 success:
                   summary: Example successful response
                   value:
                     success: true
                     message: "Booking canceled successfully"
-                   
-  
+
+
         '400':
           description: Bad request
           content:
@@ -1717,8 +1453,8 @@ paths:
                     success: false
                     errorMessageKey: "VALIDATION_ERROR"
                     errorMessage: "Cancellation window has expired. You cannot cancel this booking as the trip is too close to departure time"
-                   
-  
+
+
         '403':
           description: Forbidden - Not authorized to cancel this booking
           content:
@@ -1730,7 +1466,7 @@ paths:
                     success: false
                     errorMessageKey: "VALIDATION_ERROR"
                     errorMessage: "You are not authorized to cancel this booking"
-  
+
         '404':
           description: Booking not found
           content:
@@ -1742,7 +1478,7 @@ paths:
                     success: false
                     errorMessageKey: "NOT_FOUND"
                     errorMessage: "Booking not found"
-  
+
         '500':
           description: Server error
           content:
@@ -1846,7 +1582,7 @@ paths:
                     success: false
                     data: null
                     errorMessageKey: "ERROR_PICKUP_LIST"
-                    errorMessage: "Error in getting the list of pickups"   
+                    errorMessage: "Error in getting the list of pickups"
   /intercity/v1/active-trip:
     get:
       summary: Get active trip of rider. actual path will be <baseurl>/b2c/rider/
@@ -1916,7 +1652,7 @@ paths:
                         items:
                           type: object
                           properties:
-                            id: 
+                            id:
                               type: string
                             isPrivate:
                               type: string
@@ -1965,15 +1701,15 @@ paths:
                           car:
                             type: object
                             properties:
-                              make: 
+                              make:
                                 type: string
-                              model: 
+                              model:
                                 type: string
-                              color: 
+                              color:
                                 type: string
                               immat:
-                                type: string  
-                     
+                                type: string
+
 
               examples:
                 with-trip:
@@ -2005,7 +1741,7 @@ paths:
                           - id: "123456788"
                             seats: 1
                             isPrivate: false
-                            riderProfile: 
+                            riderProfile:
                               id: ""
                               fullName: "Usman"
                               gender: "male"
@@ -2014,20 +1750,20 @@ paths:
                               lastName: "Qamar"
                               reviewCount: 10
                               phone: "+12345678"
-                              
-                          
-                        driverProfile: 
+
+
+                        driverProfile:
                           id: "driver001"
                           phone: "+213600000000"
                           picture: "https://example.com/driver001.jpg"
                           name: "John Doe"
                           rating: 4.8
-                          car:    
+                          car:
                             make: "Toyota"
                             model: "Corolla"
                             color: "Blue"
                             immat: "123-XYZ"
-              
+
                 with-private:
                   summary: Example with private ride
                   value:
@@ -2057,7 +1793,7 @@ paths:
                           - id: "123456788"
                             seats: 1
                             isPrivate: true
-                            riderProfile: 
+                            riderProfile:
                               id: ""
                               fullName: "Usman"
                               gender: "male"
@@ -2066,20 +1802,20 @@ paths:
                               lastName: "Qamar"
                               reviewCount: 10
                               phone: "+12345678"
-                              
-                          
-                        driverProfile: 
+
+
+                        driverProfile:
                           id: "driver001"
                           phone: "+213600000000"
                           picture: "https://example.com/driver001.jpg"
                           name: "John Doe"
                           rating: 4.8
-                          car:    
+                          car:
                             make: "Toyota"
                             model: "Corolla"
                             color: "Blue"
                             immat: "123-XYZ"
-              
+
                 no-data:
                   summary: Example with no trip
                   value:
@@ -2097,7 +1833,7 @@ paths:
                     success: false
                     trip: null
                     errorMessageKey: "ERROR_ACTIVE_TRIP"
-                    errorMessage: "Error in getting the active trip"   
+                    errorMessage: "Error in getting the active trip"
   /intercity/v1/pickup:
     get:
       summary: Get list of pickups configured. actual path will be <baseurl>/b2c/common/
@@ -2199,7 +1935,7 @@ paths:
                     success: false
                     data: null
                     errorMessageKey: "ERROR_PICKUP_LIST"
-                    errorMessage: "Error in getting the list of pickups"   
+                    errorMessage: "Error in getting the list of pickups"
   /intercity/v1/destination/{pickup}:
     get:
       summary: Get list of destinations for a pickup path configured. actual path will be <baseurl>/b2c/common/
@@ -2382,8 +2118,8 @@ paths:
                       type: number
                     lng:
                       type: number
-                      
-            
+
+
             examples:
               search-request:
                 summary: Example search request
@@ -2463,15 +2199,15 @@ paths:
                             car:
                               type: object
                               properties:
-                                make: 
+                                make:
                                   type: string
-                                model: 
+                                model:
                                   type: string
-                                color: 
+                                color:
                                   type: string
                                 immat:
                                   type: string
-                          
+
 
                   requests:
                     type: array
@@ -2498,7 +2234,7 @@ paths:
                               format: date-time
                             city:
                               type: string
-                        
+
 
               examples:
                 with-trips:
@@ -2523,13 +2259,13 @@ paths:
                         currency: "DZD"
                         currencyLabel: "DZ"
                         remainingSeats: 2
-                        driverProfile: 
+                        driverProfile:
                           id: "driver001"
                           phone: "+213600000000"
                           picture: "https://example.com/driver001.jpg"
                           name: "John Doe"
                           rating: 4.8
-                          car:    
+                          car:
                             make: "Toyota"
                             model: "Corolla"
                             color: "Blue"
@@ -2577,20 +2313,44 @@ paths:
                     trips: null
                     errorMessageKey: "ERROR_SEARCH_TRIPS"
                     errorMessage: "Error searching for trips"
-  /intercity/v2/search-trips:
+  /intercity/v1/search-trips-stats:
     post:
-      summary: Search available intercity trips. actual path will be <baseurl>/b2c/rider/
+      summary: Count intercity trips per local day for the next N local days (day-tabbed)
+      description: |
+        Returns, per rider-local calendar date, the count of bookable trips on a route across
+        INTERCITY_SEARCH_WINDOW_DAYS calendar days (default 14), starting from the rider's local
+        "today" (Day 0, resolved from the `user_country` header) through local today+(N-1). The
+        window starts at the exact current instant, not local midnight - e.g. a request at 00:30
+        local on day X counts trips from 00:30 onward on day X through the end of day X+(N-1).
+        Dates with zero matching trips are omitted from the response, EXCEPT the local calendar
+        date of the request's `departureTime` (the day the caller is currently viewing), which is
+        always included even when its count is 0. No caching - every request is a fresh DB read.
+      parameters:
+        - in: header
+          name: rider_id
+          required: true
+          description: Rider ID
+          schema:
+            type: string
+          example: 66fcf4a1c5978cc125b75155
+        - in: header
+          name: user_country
+          required: true
+          description: ISO2 country code, used to resolve the rider's local timezone for day bucketing
+          schema:
+            type: string
+            
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
+              required:
+                - pickup
+                - destination
+                - departureTime
               properties:
-                datetime:
-                  type: string
-                  format: date-time
-                  description: Date and time for the trip (ISO 8601 format)
                 pickup:
                   type: string
                   description: Pickup location path
@@ -2599,35 +2359,29 @@ paths:
                   description: Destination location path
                 seats:
                   type: number
-                  description: Number of seats required
+                  description: Number of seats required (required unless isPrivate)
                 isPrivate:
                   type: boolean
-                  description: If rider is looking for empty car
-                location:
-                  type: object
-                  description: Location of user
-                  properties:
-                    lat:
-                      type: number
-                    lng:
-                      type: number
-                      
-            
+                  description: Whether the trip is private
+                departureTime:
+                  type: string
+                  format: date-time
+                  description: |
+                    Reference departure time in UTC. Converted to the rider's local calendar
+                    date (via `user_country`) - that date is always included in the response,
+                    even when its trip count is 0.
             examples:
               search-request:
                 summary: Example search request
                 value:
-                  datetime: "2024-06-10T09:00:00Z"
                   pickup: "0,192756,1258647"
                   destination: "0,192756,1258647"
                   seats: 2
-                  isPrivate: true
-                  location:
-                    lat: 3.123
-                    lng: 2.123
+                  isPrivate: false
+                  departureTime: "2026-09-20T09:30:00Z"
       responses:
         '200':
-          description: Successful response with available trips
+          description: Successful response with per-day trip counts
           content:
             application/json:
               schema:
@@ -2635,187 +2389,783 @@ paths:
                 properties:
                   success:
                     type: boolean
-                  trips:
-                    type: object
-                    description: >-
-                      Trips grouped by day. Each key is a date string in
-                      "YYYY-MM-DD" format covering the next 14 days from the
-                      search date, and each value is an array of trip
-                      objects for that day, in the same shape as the v1 flat
-                      trips array.
-                    additionalProperties:
-                      type: array
-                      items:
-                        type: object
-                        properties:
-                          id:
-                            type: string
-                          tripUid:
-                            type: string
-                          pickup:
-                            type: object
-                            properties:
-                              address:
-                                type: string
-                              city:
-                                type: string
-                              distance:
-                                type: number
-                              departureTime:
-                                type: string
-                                format: date-time
-                              arrivalTime:
-                                type: string
-                                format: date-time
-                          destination:
-                            type: object
-                            properties:
-                              address:
-                                type: string
-                              city:
-                                type: string
-                          paymentMethod:
-                            type: string
-                          price:
-                            type: number
-                          currency:
-                            type: string
-                          currencyLabel:
-                            type: string
-                          remainingSeats:
-                            type: number
-                          driverProfile:
-                            type: object
-                            properties:
-                              id:
-                                type: string
-                              phone:
-                                type: string
-                              picture:
-                                type: string
-                              name:
-                                type: string
-                              rating:
-                                type: number
-                              car:
-                                type: object
-                                properties:
-                                  make: 
-                                    type: string
-                                  model: 
-                                    type: string
-                                  color: 
-                                    type: string
-                                  immat:
-                                    type: string
-                          
-
-                  requests:
+                  data:
                     type: array
+                    description: |
+                      One entry per local calendar date with a nonzero trip count, plus the
+                      requested date's entry even when its count is 0. Sorted ascending.
                     items:
                       type: object
+                      description: Bookable-trip count for one of the rider's local calendar dates.
                       properties:
-                        id:
+                        date:
                           type: string
-                        joined:
-                          type: boolean
-                        pickup:
-                          type: object
-                          properties:
-                            departureTime:
-                              type: string
-                              format: date-time
-                            city:
-                              type: string
-                        destination:
-                          type: object
-                          properties:
-                            arrivalTime:
-                              type: string
-                              format: date-time
-                            city:
-                              type: string
-                        
-
+                          description: Rider's local calendar date (YYYY-MM-DD)
+                        count:
+                          type: number
+                          description: Number of bookable trips on that local date
               examples:
                 with-trips:
-                  summary: Example with trips
+                  summary: Example with counts on a couple of days, including the requested (empty) day
                   value:
                     success: true
-                    trips:
-                      "2024-06-10":
-                        - id: "trip001"
-                          tripUid: "XYZXYZXYZ"
-                          pickup:
-                            address: "123 Main St"
-                            city: "Blida"
-                            distance: 1200
-                            departureTime: "2024-06-10T09:30:00Z"
-                          destination:
-                            address: "456 Elm St"
-                            city: "Oran"
-                            arrivalTime: "2024-06-10T09:30:00Z"
-
-                          paymentMethod: "CASH"
-                          price: 2500
-                          currency: "DZD"
-                          currencyLabel: "DZ"
-                          remainingSeats: 2
-                          driverProfile: 
-                            id: "driver001"
-                            phone: "+213600000000"
-                            picture: "https://example.com/driver001.jpg"
-                            name: "John Doe"
-                            rating: 4.8
-                            car:    
-                              make: "Toyota"
-                              model: "Corolla"
-                              color: "Blue"
-                              immat: "123-XYZ"
-                        - id: "trip002"
-                          tripUid: "XYZXYZXYZ"
-                          pickup:
-                            address: "123 Main St"
-                            city: "Blida"
-                            distance: 1200
-                            departureTime: "2024-06-10T09:30:00Z"
-
-                          destination:
-                            address: "456 Elm St"
-                            city: "Oran"
-                            arrivalTime: "2024-06-10T09:30:00Z"
-
-                          paymentMethod: "CASH"
-                      "2024-06-11": []
-                    requests: []
-                no-data:
-                  summary: Example with no trips
-                  value:
-                    success: true
-                    trips: null
+                    data:
+                      - date: "2026-09-20"
+                        count: 0
+                      - date: "2026-09-22"
+                        count: 10
         '400':
           description: Bad request, invalid or missing parameters
           content:
             application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  data:
+                    type: object
+                    nullable: true
+                    example: null
+                  errorMessageKey:
+                    type: string
+                  errorMessage:
+                    type: string
               examples:
                 bad_request:
                   summary: Example bad request response
                   value:
                     success: false
-                    trips: null
                     errorMessageKey: "REQUIRED_FIELD_ERROR"
                     errorMessage: "Invalid or missing parameters"
         '500':
           description: Server error
           content:
             application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  data:
+                    type: object
+                    nullable: true
+                    example: null
+                  errorMessageKey:
+                    type: string
+                  errorMessage:
+                    type: string
               examples:
                 search_error:
                   summary: Example error response
                   value:
                     success: false
-                    trips: null
                     errorMessageKey: "ERROR_SEARCH_TRIPS"
+                    errorMessage: "Error searching for trips"
+  /intercity/v2/search-trips:
+    post:
+      summary: Cursor-paginated search for available intercity trips on a specific local day
+      description: |
+
+        Same search body as v1/search-trips (pickup, destination, seats, isPrivate, location),
+
+        except in place of a precise UTC `datetime` it takes a rider-local calendar `date`
+
+        (YYYY-MM-DD, resolved via `user_country`). Returns trips departing from "now" (if the
+
+        date is today) through the end of that local date, cursor-paginated and sorted by
+
+
+      parameters:
+        - in: header
+          name: rider_id
+          required: true
+          description: Rider ID
+          schema:
+            type: string
+          example: 66fcf4a1c5978cc125b75155
+
+        - in: header
+
+          name: user_country
+
+          required: true
+
+          description: ISO2 country code, used to resolve the rider's local timezone for day bucketing
+
+          schema:
+
+            type: string
+
+        - in: header
+          name: app_language
+          required: false
+          description: Preferred language for currency label (e.g. en, fr, ar)
+          schema:
+            type: string
+            default: en
+
+        - in: query
+          name: cursor
+          required: false
+          description: next cursor
+          schema:
+            type: string
+        - in: query
+          name: limit
+          required: false
+          description: per page szie
+          schema:
+            type: number
+
+      requestBody:
+
+        required: true
+
+        content:
+
+          application/json:
+
+            schema:
+
+              type: object
+
+              required:
+
+                - pickup
+                - destination
+                - date
+                - seats
+
+              properties:
+
+                pickup:
+
+                  type: string
+
+                  description: Pickup location path
+
+                destination:
+
+                  type: string
+
+                  description: Destination location path
+
+                seats:
+
+                  type: number
+
+                  description: Number of seats required (required unless isPrivate)
+
+                isPrivate:
+
+                  type: boolean
+
+                  description: Whether the trip is private
+
+                date:
+
+                  type: string
+
+                  description: |
+
+                    Rider-local calendar date to search (YYYY-MM-DD), resolved via `user_country`.
+
+                    Trips are searched from "now" (if `date` is today) or local midnight (if a
+
+                    future date) through the end of that local date.
+
+                cursor:
+
+                  type: string
+
+                  description: Opaque pagination cursor from a previous response's `nextCursor`
+
+                limit:
+
+                  type: number
+
+                  description: Page size (default 10, max 50)
+
+                location:
+
+                  type: object
+
+                  description: Location of user (optional)
+
+                  properties:
+
+                    lat:
+
+                      type: number
+
+                      example: 36.734546
+
+                    lng:
+
+                      type: number
+
+                      example: 3.027710
+
+            examples:
+
+              search-request:
+                summary: Example search request
+
+                value:
+                  pickup: "0,192756,1258647"
+                  destination: "0,192756,1258647"
+                  seats: 2
+                  isPrivate: false
+                  date: "2026-09-25"
+                  location:
+                    lat: 3.123
+                    lng: 2.123
+
+      responses:
+
+        '200':
+
+          description: Successful response with a page of trips for the given local day
+
+          content:
+
+            application/json:
+
+              schema:
+
+                type: object
+
+                properties:
+
+                  success:
+
+                    type: boolean
+
+                  trips:
+
+                    type: array
+
+                    items:
+
+                      type: object
+
+                      description: |
+
+                        Shared intercity trip shape. Not every endpoint returns every field -
+
+                        each response only sets the subset relevant to it.
+
+                      properties:
+
+                        id:
+
+                          type: string
+
+                        tripUid:
+
+                          type: string
+
+                        status:
+
+                          type: string
+
+                        pickup:
+
+                          type: object
+
+                          properties:
+
+                            address:
+
+                              type: string
+
+                            city:
+
+                              type: string
+
+                            distance:
+
+                              type: number
+
+                            departureTime:
+
+                              type: string
+
+                              format: date-time
+
+                            arrivalTime:
+
+                              type: string
+
+                              format: date-time
+
+                            lat:
+
+                              type: number
+
+                            lng:
+
+                              type: number
+
+                        destination:
+
+                          type: object
+
+                          properties:
+
+                            address:
+
+                              type: string
+
+                            city:
+
+                              type: string
+
+                            distance:
+
+                              type: number
+
+                            departureTime:
+
+                              type: string
+
+                              format: date-time
+
+                            arrivalTime:
+
+                              type: string
+
+                              format: date-time
+
+                            lat:
+
+                              type: number
+
+                            lng:
+
+                              type: number
+
+                        price:
+
+                          type: number
+
+                        tripCostWithTax:
+
+                          type: number
+
+                        baseCost:
+
+                          type: number
+
+                        estimatedPrice:
+
+                          type: number
+
+                        appliedTaxesRider:
+
+                          type: array
+
+                          items:
+
+                            type: object
+
+                            properties:
+
+                              label:
+
+                                type: string
+
+                              amount:
+
+                                type: number
+
+                        tripCostBreakDown:
+
+                          type: object
+
+                          properties:
+
+                            netEarning:
+
+                              type: number
+
+                            yassirFee:
+
+                              type: number
+
+                            driverToYassir:
+
+                              type: number
+
+                            yassirToDriver:
+
+                              type: number
+
+                            appliedTaxesRider:
+
+                              type: array
+
+                              items:
+
+                                type: object
+
+                                properties:
+
+                                  label:
+
+                                    type: string
+
+                                  amount:
+
+                                    type: number
+
+                            appliedTaxesDriver:
+
+                              type: array
+
+                              items:
+
+                                type: object
+
+                                properties:
+
+                                  label:
+
+                                    type: string
+
+                                  amount:
+
+                                    type: number
+
+                        maxSeats:
+
+                          type: number
+
+                        remainingSeats:
+
+                          type: number
+
+                        currency:
+
+                          type: string
+
+                        currencyLabel:
+
+                          type: string
+
+                        paymentMethod:
+
+                          type: string
+
+                        driverProfile:
+
+                          type: object
+
+                          properties:
+
+                            id:
+
+                              type: string
+
+                            phone:
+
+                              type: string
+
+                            picture:
+
+                              type: string
+
+                            name:
+
+                              type: string
+
+                            rating:
+
+                              type: number
+
+                            car:
+
+                              type: object
+
+                              properties:
+
+                                make:
+
+                                  type: string
+
+                                model:
+
+                                  type: string
+
+                                color:
+
+                                  type: string
+
+                                immat:
+
+                                  type: string
+
+                                plateNumber:
+
+                                  type: string
+
+                        bookings:
+
+                          type: array
+
+                          items:
+
+                            type: object
+
+                            properties:
+
+                              id:
+
+                                type: string
+
+                              seats:
+
+                                type: number
+
+                              isPrivate:
+
+                                type: boolean
+
+                              riderPay:
+
+                                type: object
+
+                                properties:
+
+                                  amount:
+
+                                    type: number
+
+                                  amountWithTax:
+
+                                    type: number
+
+                                  tax:
+
+                                    type: array
+
+                                    items:
+
+                                      type: object
+
+                                      properties:
+
+                                        label:
+
+                                          type: string
+
+                                        amount:
+
+                                          type: number
+
+                              riderProfile:
+
+                                type: object
+
+                                properties:
+
+                                  id:
+
+                                    type: string
+
+                                  rider:
+
+                                    type: string
+
+                                  email:
+
+                                    type: string
+
+                                  fullName:
+
+                                    type: string
+
+                                  firstName:
+
+                                    type: string
+
+                                  lastName:
+
+                                    type: string
+
+                                  gender:
+
+                                    type: string
+
+                                  phone:
+
+                                    type: string
+
+                                  rating:
+
+                                    type: number
+
+                                  reviewCount:
+
+                                    type: number
+
+                  nextCursor:
+
+                    type: string
+
+                    nullable: true
+
+                    description: Opaque cursor for the next page; null when there are no more results
+
+                  hasMore:
+
+                    type: boolean
+
+              examples:
+
+                with-trips:
+
+                  summary: Example with a page of trips
+
+                  value:
+
+                    success: true
+
+                    trips:
+
+                      - id: "trip001"
+
+                        tripUid: "XXXXXXX"
+
+                        pickup:
+
+                          address: "123 Main St"
+
+                          city: "Blida"
+
+                          departureTime: "2026-09-25T09:30:00Z"
+
+                        destination:
+
+                          address: "456 Elm St"
+
+                          city: "Oran"
+
+                          arrivalTime: "2026-09-25T12:30:00Z"
+
+                        paymentMethod: "CASH"
+
+                        price: 2500
+
+                        currency: "DZD"
+
+                        remainingSeats: 2
+
+                    nextCursor: "MjAyNi0wOS0yNVQwOTozMDowMC4wMDBaf2FiYzEyMw=="
+
+                    hasMore: true
+
+        '400':
+
+          description: Bad request, invalid or missing parameters
+
+          content:
+
+            application/json:
+
+              schema:
+
+                type: object
+
+                properties:
+
+                  success:
+
+                    type: boolean
+
+                    example: false
+
+                  data:
+
+                    type: object
+
+                    nullable: true
+
+                    example: null
+
+                  errorMessageKey:
+
+                    type: string
+
+                  errorMessage:
+
+                    type: string
+
+              examples:
+
+                bad_request:
+
+                  summary: Example bad request response
+
+                  value:
+
+                    success: false
+
+                    errorMessageKey: "REQUIRED_FIELD_ERROR"
+
+                    errorMessage: "Invalid or missing parameters"
+
+        '500':
+
+          description: Server error
+
+          content:
+
+            application/json:
+
+              schema:
+
+                type: object
+
+                properties:
+
+                  success:
+
+                    type: boolean
+
+                    example: false
+
+                  data:
+
+                    type: object
+
+                    nullable: true
+
+                    example: null
+
+                  errorMessageKey:
+
+                    type: string
+
+                  errorMessage:
+
+                    type: string
+
+              examples:
+
+                search_error:
+
+                  summary: Example error response
+
+                  value:
+
+                    success: false
+
+                    errorMessageKey: "ERROR_SEARCH_TRIPS"
+
                     errorMessage: "Error searching for trips"
   /intercity/v1/pricing:
     post:
@@ -2833,16 +3183,16 @@ paths:
                 destination:
                   type: string
                   description: Destination location path
-              
-              
-            
+
+
+
             examples:
               search-request:
                 summary: Example search request
                 value:
                   pickup: "0,192756,1258647"
                   destination: "0,192756,1258647"
-              
+
       parameters:
         - in: header
           name: yassir-app-language
@@ -2876,7 +3226,7 @@ paths:
                   currency:
                     type: string
                     description: Currency
-                
+
               examples:
                 with-data:
                   summary: Example with some data
@@ -2936,8 +3286,8 @@ paths:
                   description: number of seats to book
                 isPrivate:
                   type: boolean
-              
-            
+
+
             examples:
               book-request:
                 summary: Book Private
@@ -2966,7 +3316,7 @@ paths:
                   bookingId:
                     type: number
                     description: Booking Id
-                
+
               examples:
                 with-data:
                   summary: Example with some data
@@ -3023,7 +3373,7 @@ paths:
                     errorMessage: "Error in getting the pricing config for the trip"
   /intercity/v1/{driverId}/driver-insights:
     get:
-      summary: Get driver insights and statistics. 
+      summary: Get driver insights and statistics.
       parameters:
         - name: driverId
           in: path
@@ -3031,7 +3381,7 @@ paths:
           schema:
             type: string
           description: The ID of the driver
-       
+
       security:
         - bearerAuth: []
       responses:
@@ -3115,17 +3465,6 @@ paths:
                             en: "The driver is friendly and courteous"
                             fr: "Le chauffeur est sympathique et courtois"
                             ar: "السائق ودود ومهذب"
-                          icon: "https://storage.googleapis.com/ysr-mobility-stg-pricing-dashboard/driver-insights/rev-1741629974153-2960-1750947879952.png"
-                          category: "fourAndFive"
-                          foregroundColor: "#FB2576"
-                          backgroundColor: "#FFE6E1"
-                          count: 14
-                        - _id: "685d5828ef5984005a1c16a4"
-                          driverReviewCode: "REV-1741629974153-2960"
-                          description:
-                            en: "Arrival on time"
-                            fr: "Arrival on time"
-                            ar: "Arrival on time"
                           icon: "https://storage.googleapis.com/ysr-mobility-stg-pricing-dashboard/driver-insights/rev-1741629974153-2960-1750947879952.png"
                           category: "fourAndFive"
                           foregroundColor: "#FB2576"
