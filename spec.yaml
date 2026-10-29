@@ -14,6 +14,123 @@ components:
       name: Authorization  # optional, for documentation
 
 paths:
+  /common/trips/cancelreasons:
+    get:
+      summary: List available cancellation reasons (rider/driver). actual path will be <baseurl>/b2c/rider/
+      description: |
+        Returns an ordered list of active cancel reasons for intercity bookings.
+
+        Use isIntercity=true to fetch the rider intercity reasons.
+        Defaults return B2C rider reasons for classic trips applicable to all countries.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: country
+          required: false
+          schema:
+            type: string
+          description: Country code or ALL
+        - in: query
+          name: category
+          required: false
+          schema:
+            type: string
+            enum: [B2C, B2B]
+          description: Trip category
+        - in: query
+          name: type
+          required: false
+          schema:
+            type: string
+            enum: [CLASSIC, MULTISTOPS]
+          description: Trip type
+        - in: query
+          name: entity
+          required: false
+          schema:
+            type: string
+            enum: [YA_GO_RIDER, YA_GO_DRIVER]
+          description: Rider or driver
+        - in: query
+          name: isDelivery
+          required: false
+          schema:
+            type: boolean
+          description: Parcel delivery reasons when true
+      responses:
+        "200":
+          description: Successful response with cancel reasons
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        _id:
+                          type: string
+                        desc:
+                          type: object
+                          properties:
+                            en:
+                              type: string
+                            fr:
+                              type: string
+                            ar:
+                              type: string
+                        priority:
+                          type: integer
+                        comment_allowed:
+                          type: boolean
+              examples:
+                intercity-rider:
+                  summary: Intercity rider reasons
+                  value:
+                    success: true
+                    items:
+                      - _id: "6ada09de864aa7c45a613318"
+                        desc:
+                          en: "I changed my mind"
+                          fr: "J'ai changé d'avis"
+                          ar: "لقد غيرت رأيي"
+                        priority: 1
+                        comment_allowed: true
+                      - _id: "6ad9dcc9954ac8a78c4585f0"
+                        desc:
+                          en: "I found a cheaper option"
+                          fr: "J'ai trouvé une option moins chere"
+                          ar: "وجدت خيارا ارخص"
+                        priority: 2
+                        comment_allowed: false
+                classic-rider:
+                  summary: Classic rider reasons (isIntercity=false)
+                  value:
+                    success: true
+                    items:
+                      - _id: "507f1f77bcf86cd799439011"
+                        desc:
+                          en: "Change of plans"
+                          fr: "Changement de plans"
+                          ar: "تغيير الخطط"
+                        priority: 1
+                        comment_allowed: true
+        "500":
+          description: Server error
+          content:
+            application/json:
+              examples:
+                server_error:
+                  summary: Internal server error
+                  value:
+                    success: false
+                    errorMessageKey: "list-cancel-reasons-failed"
+                    errorMessage: "Error retrieving cancel reasons"
   /intercity/v1/trips/history/{tripId}:
     get:
       summary: Get detailed information about a specific intercity trip for a rider. actual path will be <baseurl>/b2c/rider/
@@ -1397,16 +1514,49 @@ paths:
           application/json:
             schema:
               type: object
+              required:
+                - bookingId
               properties:
                 bookingId:
                   type: string
                   description: The ID of the booking to cancel
+                reasonId:
+                  type: string
+                  description: Optional ID of a cancel reason selected from GET /common/trips/cancelreasons (ObjectId)
+                reason:
+                  oneOf:
+                    - type: string
+                    - type: object
+                      properties:
+                        en:
+                          type: string
+                        fr:
+                          type: string
+                        ar:
+                          type: string
+                  description: Optional free-text reason or the catalog description object. String max 2000 chars
+                comment:
+                  type: string
+                  description: Optional free comment (max 1000 chars), only when comment_allowed=true
+                cancelReason:
+                  type: string
+                  description: Legacy alias for reason (accepted when reason is omitted)
 
             examples:
               cancel-request:
                 summary: Example cancel request
                 value:
                   bookingId: "507f1f77bcf86cd799439011"
+              cancel-with-reason:
+                summary: Example cancel request with a catalog reason
+                value:
+                  bookingId: "507f1f77bcf86cd799439011"
+                  reasonId: "6ada09de864aa7c45a613318"
+                  reason:
+                    en: "I changed my mind"
+                    fr: "J'ai changé d'avis"
+                    ar: "لقد غيرت رأيي"
+                  comment: "Driver was late"
       security:
         - bearerAuth: []
       responses:
@@ -1441,6 +1591,36 @@ paths:
                     success: false
                     errorMessageKey: "REQUIRED_FIELD_ERROR"
                     errorMessage: "Booking ID is required and must be valid"
+                invalid_reason_id:
+                  summary: Invalid cancel reason ID
+                  value:
+                    success: false
+                    errorMessageKey: "REQUIRED_FIELD_ERROR"
+                    errorMessage: "Reason ID must be valid"
+                invalid_reason_type:
+                  summary: Invalid reason type
+                  value:
+                    success: false
+                    errorMessageKey: "REQUIRED_FIELD_ERROR"
+                    errorMessage: "Reason must be a string or an object"
+                reason_too_long:
+                  summary: Reason is too long
+                  value:
+                    success: false
+                    errorMessageKey: "REQUIRED_FIELD_ERROR"
+                    errorMessage: "Reason is too long"
+                invalid_comment_type:
+                  summary: Invalid comment type
+                  value:
+                    success: false
+                    errorMessageKey: "REQUIRED_FIELD_ERROR"
+                    errorMessage: "Comment must be a string"
+                comment_too_long:
+                  summary: Comment is too long
+                  value:
+                    success: false
+                    errorMessageKey: "REQUIRED_FIELD_ERROR"
+                    errorMessage: "Comment is too long"
                 already_canceled:
                   summary: Booking already canceled
                   value:
