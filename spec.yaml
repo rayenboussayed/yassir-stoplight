@@ -4,7 +4,3699 @@ info:
   version: 1.0.0
 
 servers:
+  - url: http://localhost:4010openapi: 3.0.3
+info:
+  title: Intercity Mock API
+  version: 1.0.0
+
+servers:
   - url: http://localhost:4010
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: apiKey
+      in: header
+      name: Authorization  # optional, for documentation
+
+paths:
+  /common/trips/cancelreasons:
+    get:
+      summary: List available cancellation reasons (rider/driver). actual path will be <baseurl>/b2c/rider/
+      description: |
+        Returns an ordered list of active cancel reasons for intercity bookings.
+
+        Use isIntercity=true to fetch the rider intercity reasons.
+        Defaults return B2C rider reasons for classic trips applicable to all countries.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: country
+          required: false
+          schema:
+            type: string
+          description: Country code or ALL
+        - in: query
+          name: category
+          required: false
+          schema:
+            type: string
+            enum: [B2C, B2B]
+          description: Trip category
+        - in: query
+          name: type
+          required: false
+          schema:
+            type: string
+            enum: [CLASSIC, MULTISTOPS]
+          description: Trip type
+        - in: query
+          name: entity
+          required: false
+          schema:
+            type: string
+            enum: [YA_GO_RIDER, YA_GO_DRIVER]
+          description: Rider or driver
+        - in: query
+          name: isDelivery
+          required: false
+          schema:
+            type: boolean
+          description: Parcel delivery reasons when true
+        - in: query
+          name: isIntercity
+          required: false
+          schema:
+            type: boolean
+          description: Intercity rider reasons when true
+      responses:
+        "200":
+          description: Successful response with cancel reasons
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        _id:
+                          type: string
+                        desc:
+                          type: object
+                          properties:
+                            en:
+                              type: string
+                            fr:
+                              type: string
+                            ar:
+                              type: string
+                        priority:
+                          type: integer
+                        comment_allowed:
+                          type: boolean
+              examples:
+                intercity-rider:
+                  summary: Intercity rider reasons
+                  value:
+                    success: true
+                    items:
+                      - _id: "6ada09de864aa7c45a613318"
+                        desc:
+                          en: "I changed my mind"
+                          fr: "J'ai changé d'avis"
+                          ar: "لقد غيرت رأيي"
+                        priority: 1
+                        comment_allowed: true
+                      - _id: "6ad9dcc9954ac8a78c4585f0"
+                        desc:
+                          en: "I found a cheaper option"
+                          fr: "J'ai trouvé une option moins chere"
+                          ar: "وجدت خيارا ارخص"
+                        priority: 2
+                        comment_allowed: false
+                classic-rider:
+                  summary: Classic rider reasons (isIntercity=false)
+                  value:
+                    success: true
+                    items:
+                      - _id: "507f1f77bcf86cd799439011"
+                        desc:
+                          en: "Change of plans"
+                          fr: "Changement de plans"
+                          ar: "تغيير الخطط"
+                        priority: 1
+                        comment_allowed: true
+        "500":
+          description: Server error
+          content:
+            application/json:
+              examples:
+                server_error:
+                  summary: Internal server error
+                  value:
+                    success: false
+                    errorMessageKey: "list-cancel-reasons-failed"
+                    errorMessage: "Error retrieving cancel reasons"
+  /intercity/v1/trips/history/{tripId}:
+    get:
+      summary: Get detailed information about a specific intercity trip for a rider. actual path will be <baseurl>/b2c/rider/
+      description: Retrieves detailed information about a single intercity trip. Includes ownership verification to ensure the rider has access to the trip.
+      parameters:
+        - name: tripId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The unique identifier of the trip
+
+        - name: app_language
+          in: header
+          required: false
+          schema:
+            type: string
+          description: Preferred language for the response (e.g. en, fr, ar)
+
+      responses:
+        "200":
+          description: Successful response with trip details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  trip:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        example: "507f1f77bcf86cd799439011"
+                      tripUid:
+                        type: string
+                        example: "ABC123"
+                      status:
+                        type: string
+                        enum:
+                          - COMPLETED
+                          - SCHEDULED
+                          - CANCELED
+                        example: "SCHEDULED"
+
+                      pickup:
+                        type: object
+                        properties:
+                          address:
+                            type: string
+                            example: "123 Main St"
+                          city:
+                            type: string
+                            example: "Blida"
+                          departureTime:
+                            type: string
+                            format: date-time
+                            example: "2026-02-10T08:00:00.000Z"
+
+                      destination:
+                        type: object
+                        properties:
+                          address:
+                            type: string
+                            example: "456 Elm St"
+                          city:
+                            type: string
+                            example: "Oran"
+                          arrivalTime:
+                            type: string
+                            format: date-time
+                            example: "2026-02-10T08:00:00.000Z"
+
+                      price:
+                        type: number
+                        example: 2500
+
+                      riderPay:
+                        type: object
+                        properties:
+                          amount:
+                            type: number
+                            example: 2500
+
+                          amountWithoutTax:
+                            type: number
+                            example: 2000
+                          tax:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                label:
+                                  type: string
+                                  example: TAX1
+                                amount:
+                                  type: number
+                                  example: 500
+                      currency:
+                        type: string
+                        example: "DZD"
+
+                      currencyLabel:
+                        type: string
+                        example: "DA"
+
+                      remainingSeats:
+                        type: number
+                        example: 2
+
+                      maxSeats:
+                        type: number
+                        example: 4
+
+                      driverProfile:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            example: "driver123"
+                          name:
+                            type: string
+                            example: "John Doe"
+                          phone:
+                            type: string
+                            example: "+213600000000"
+                          rating:
+                            type: number
+                            example: 4.8
+                          picture:
+                            type: string
+                            example: "https://example.com/profile.jpg"
+                          car:
+                            type: object
+                            properties:
+                              make:
+                                type: string
+                                example: Toyota
+                              model:
+                                type: string
+                                example: MarkX
+                              color:
+                                type: string
+                                example: White
+                              plateNumber:
+                                type: string
+                                example: ABC-123
+                      bookings:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            isPrivate:
+                              type: boolean
+                            seats:
+                              type: number
+                            riderProfile:
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                                rider:
+                                  type: string
+                                email:
+                                  type: string
+                                fullName:
+                                  type: string
+                                firstName:
+                                  type: string
+                                lastName:
+                                  type: string
+                                gender:
+                                  type: string
+                                phone:
+                                  type: string
+                                rating:
+                                  type: number
+                                reviewCount:
+                                  type: number
+        "400":
+          description: Bad request - missing or invalid parameters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  errorMessageKey:
+                    type: string
+                  errorMessage:
+                    type: string
+              examples:
+                missing_rider_id:
+                  summary: Missing rider_id header
+                  value:
+                    success: false
+                    errorMessageKey: REQUIRED_FIELD_ERROR
+                    errorMessage: Rider ID is required
+
+                missing_trip_id:
+                  summary: Missing tripId parameter
+                  value:
+                    success: false
+                    errorMessageKey: REQUIRED_FIELD_ERROR
+                    errorMessage: Trip ID is required
+
+        "403":
+          description: Forbidden - rider does not have access to this trip
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  errorMessageKey:
+                    type: string
+                    example: UNAUTHORIZED_ACCESS
+                  errorMessage:
+                    type: string
+                    example: You are not authorized to view this trip
+
+        "404":
+          description: Trip not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  errorMessageKey:
+                    type: string
+                    example: TRIP_NOT_FOUND
+                  errorMessage:
+                    type: string
+                    example: Trip not found
+
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  errorMessageKey:
+                    type: string
+                    example: ERROR_FETCH_RIDER_TRIP_DETAIL
+                  errorMessage:
+                    type: string
+                    example: Error fetching rider trip detail
+
+  /intercity/v1/checkTripConflict:
+    post:
+      summary: Checks the trip conflict. actual path will be <baseurl>/b2c/driver/
+
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: header
+          name: driver_id
+          required: false
+          schema:
+            type: string
+          description: Driver ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - departureTime
+                - pickup
+                - destination
+              properties:
+                departureTime:
+                  type: string
+                pickup:
+                  type: object
+                  description: Pickup location path
+                  properties:
+                    lat:
+                      type: number
+                      description: Latitude of the pickup location
+                    lng:
+                      type: number
+                      description: Longitude of the pickup location
+                    path:
+                      type: string
+                      description: Level 1 path of the city (wilaya)
+                destination:
+                  type: string
+
+            examples:
+              trip:
+                summary: Example
+                value:
+                  departureTime: "2026-02-10T08:00:00.000Z"
+                  pickup:
+                    lat: 36.752887
+                    lng: 3.042048
+                    path: "0,192756,1258648"
+                  destination: "2,1,0"
+      responses:
+        "200":
+          description: Trip conflict check successfull
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+              examples:
+                success:
+                  summary: Trip time available
+                  value:
+                    success: true
+                    message: Trip time available
+
+        "400":
+          description: Bad request - Invalid parameters or trip cannot be canceled
+          content:
+            application/json:
+              examples:
+                missing_time:
+                  summary: Missing departureTime
+                  value:
+                    success: false
+                    errorMessageKey: REQUIRED_FIELD_ERROR
+                    errorMessage: Trip time is required
+
+        "403":
+          description: Time conflict found
+          content:
+            application/json:
+              examples:
+                missing_time:
+                  summary: Missing departureTime
+                  value:
+                    success: false
+                    errorMessageKey: TIME_CONFLICT_ERROR
+                    errorMessage: You have an overlapping trip scheduled for this time
+
+        "500":
+          description: Server error
+          content:
+            application/json:
+              examples:
+                server_error:
+                  summary: Internal server error
+                  value:
+                    success: false
+                    errorMessageKey: ERROR_CHECK_TRIP_CONFLICT
+
+  /intercity/v1/cancelTrip:
+    post:
+      summary: Cancel an intercity trip and all related bookings. actual path will be <baseurl>/b2c/driver/
+      description: |
+        Allows a driver to cancel their trip. This will set the trip status to DRIVER_CANCELLED and cancel all related bookings.
+
+        If the trip has confirmed bookings, cancellation is only allowed if the departure time is more than
+        INTERCITY_TRIP_CANCEL_WINDOW (default: 2) hours in the future.
+        Trips without bookings can be canceled at any time.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: header
+          name: driver_id
+          required: false
+          schema:
+            type: string
+          description: Driver ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - tripId
+              properties:
+                tripId:
+                  type: string
+                  description: The ID of the trip to cancel
+            examples:
+              cancel-trip:
+                summary: Example cancel trip request
+                value:
+                  tripId: "6550f8a8e4b0a2f9c8b0e1a3"
+      responses:
+        "200":
+          description: Trip canceled successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+              examples:
+                success:
+                  summary: Trip canceled successfully
+                  value:
+                    success: true
+                    message: Trip canceled successfully
+        "400":
+          description: Bad request - Invalid parameters or trip cannot be canceled
+          content:
+            application/json:
+              examples:
+                missing_trip_id:
+                  summary: Missing trip ID
+                  value:
+                    success: false
+                    errorMessageKey: REQUIRED_FIELD_ERROR
+                    errorMessage: Trip ID is required
+                missing_driver_id:
+                  summary: Missing driver ID header
+                  value:
+                    success: false
+                    errorMessageKey: REQUIRED_FIELD_ERROR
+                    errorMessage: Driver ID is required
+        "403":
+          description: Forbidden - Not authorized to cancel this trip
+          content:
+            application/json:
+              examples:
+                unauthorized:
+                  summary: Not authorized to cancel trip
+                  value:
+                    success: false
+                    errorMessageKey: VALIDATION_ERROR
+                    errorMessage: You are not authorized to perform this action
+                time_window:
+                  summary: Cancellation time window passed
+                  value:
+                    success: false
+                    errorMessageKey: CANCEL_WINDOW_EXPIRED
+                    errorMessage: Cannot cancel trip with bookings less than 2 hours before departure
+        "404":
+          description: Trip not found
+          content:
+            application/json:
+              examples:
+                not_found:
+                  summary: Trip not found
+                  value:
+                    success: false
+                    errorMessageKey: NOT_FOUND
+                    errorMessage: Trip not found
+        "500":
+          description: Server error
+          content:
+            application/json:
+              examples:
+                server_error:
+                  summary: Internal server error
+                  value:
+                    success: false
+                    errorMessageKey: ERROR_CANCEL_TRIP
+                    errorMessage: Error canceling the intercity trip
+
+  /intercity/v1/trips:
+    get:
+      summary: Get driver's upcoming or past intercity trips with bookings
+      description: Retrieves driver's trips. For UPCOMING trips, all trips are returned. For PAST trips (or when statusType is not UPCOMING), cursor-based pagination is applied when cursor/limit parameters are provided.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: statusType
+          required: false
+          schema:
+            type: string
+            enum: [UPCOMING, PAST]
+            default: PAST
+        - in: query
+          name: cursor
+          description: "first time dont send this. pass value next time received from api response"
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 10
+        - in: header
+          name: driver_id
+          required: false
+          schema:
+            type: string
+        - in: header
+          name: app_language
+          required: false
+          schema:
+            type: string
+            default: en
+      responses:
+        "200":
+          description: Trips retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  trips:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        tripUid:
+                          type: string
+                        status:
+                          type: string
+                        pickup:
+                          type: object
+                          properties:
+                            address:
+                              type: string
+                            city:
+                              type: string
+                            distance:
+                              type: number
+                            departureTime:
+                              type: string
+                              format: date-time
+                            lat:
+                              type: number
+                            lng:
+                              type: number
+                        destination:
+                          type: object
+                          properties:
+                            address:
+                              type: string
+                            arrivalTime:
+                              type: string
+                              format: date-time
+                            city:
+                              type: string
+                            lat:
+                              type: number
+                            lng:
+                              type: number
+                        price:
+                          type: number
+                        maxSeats:
+                          type: number
+                        currency:
+                          type: string
+                        currencyLabel:
+                          type: string
+                        bookings:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              id:
+                                type: string
+                              seats:
+                                type: number
+                              riderProfile:
+                                type: object
+                                properties:
+                                  id:
+                                    type: string
+                                  rider:
+                                    type: string
+                                  email:
+                                    type: string
+                                  fullName:
+                                    type: string
+                                  firstName:
+                                    type: string
+                                  lastName:
+                                    type: string
+                                  gender:
+                                    type: string
+                                  phone:
+                                    type: string
+                                  rating:
+                                    type: number
+                                  reviewCount:
+                                    type: number
+                  nextCursor:
+                    type: string
+                    nullable: true
+                  hasMore:
+                    type: boolean
+              examples:
+                upcoming-trips:
+                  summary: Upcoming trips without pagination
+                  value:
+                    success: true
+                    trips:
+                      - id: "6550f8a8e4b0a2f9c8b0e1a3"
+                        status: DRIVER_ASSIGNED
+                        tripUid: ABCDEFG
+                        pickup:
+                          address: Place des Martyrs, Algiers
+                          city: Algiers
+                          distance: 2500
+                          departureTime: "2026-02-10T08:00:00.000Z"
+                          lat: 36.7538
+                          lng: 3.0588
+                        destination:
+                          address: Place du 1er Novembre, Oran
+                          arrivalTime: "2026-02-10T12:30:00.000Z"
+                          city: Oran
+                          lat: 35.6969
+                          lng: -0.6331
+                        price: 1500
+                        maxSeats: 4
+                        currency: DZD
+                        currencyLabel: DA
+                        bookings:
+                          - id: "6550f8a8e4b0a2f9c8b0e1a4"
+                            seats: 2
+                            riderProfile:
+                              id: "6550f8a8e4b0a2f9c8b0e1a5"
+                              rider: "6550f8a8e4b0a2f9c8b0e1a5"
+                              email: rider1@example.com
+                              fullName: Alice Smith
+                              firstName: Alice
+                              lastName: Smith
+                              gender: female
+                              phone: "+213600000001"
+                              rating: 4.5
+                              reviewCount: 10
+                past-trips-paginated:
+                  summary: Past trips with cursor-based pagination
+                  value:
+                    success: true
+                    trips:
+                      - id: "6550f8a8e4b0a2f9c8b0e1a8"
+                        status: FINISHED
+                        tripUid: XYZ123
+                        pickup:
+                          address: Avenue Aouati Mostefa, Constantine
+                          city: Constantine
+                          distance: null
+                          departureTime: "2026-02-08T14:00:00.000Z"
+                          lat: 36.365
+                          lng: 6.6147
+                        destination:
+                          address: Boulevard du 1er Novembre, Annaba
+                          arrivalTime: "2026-02-08T16:00:00.000Z"
+                          city: Annaba
+                          lat: 36.9
+                          lng: 7.7667
+                        price: 800
+                        maxSeats: 4
+                        currency: DZD
+                        currencyLabel: DA
+                        bookings: []
+                    nextCursor: "6550f8a8e4b0a2f9c8b0e1a8"
+                    hasMore: true
+                no-trips:
+                  summary: No trips
+                  value:
+                    success: true
+                    trips: []
+        "400":
+          description: Bad request, invalid parameters
+          content:
+            application/json:
+              examples:
+                invalid_type:
+                  summary: Invalid type parameter
+                  value:
+                    success: false
+                    errorMessageKey: REQUIRED_FIELD_ERROR
+                    errorMessage: Type must be either UPCOMING or PAST
+                missing_driver_id:
+                  summary: Missing driver ID header
+                  value:
+                    success: false
+                    errorMessageKey: REQUIRED_FIELD_ERROR
+                    errorMessage: Driver ID is required
+        "500":
+          description: Server error
+          content:
+            application/json:
+              examples:
+                server_error:
+                  summary: Internal server error
+                  value:
+                    status: false
+                    errorMessageKey: ERROR_FETCH_DRIVER_TRIPS
+                    errorMessage: Error fetching driver trips
+
+  /intercity/v1/trip/{tripId}:
+    get:
+      summary: Get trip details with all bookings
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: tripId
+          required: true
+          schema:
+            type: string
+          description: Trip ID
+        - in: query
+          name: location
+          required: false
+          schema:
+            type: string
+          description: location of driver as "lat,lng"
+        - in: query
+          name: seats
+          required: false
+          schema:
+            type: string
+          description: Number of seats to estimate tax value
+        - in: query
+          name: isPrivate
+          required: false
+          schema:
+            type: boolean
+          description: Rider is looking for private
+        - in: header
+          name: driver_id
+          required: false
+          schema:
+            type: string
+          description: Driver ID
+        - in: header
+          name: app_language
+          required: false
+          schema:
+            type: string
+            default: en
+          description: Preferred language for currency label (e.g. en, fr, ar)
+
+      responses:
+        '200':
+          description: Trip details retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  trip:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      tripUid:
+                        type: string
+                      status:
+                        type: string
+                      pickup:
+                        type: object
+                        properties:
+                          address:
+                            type: string
+                          city:
+                            type: string
+                          distance:
+                            type: number
+                          departureTime:
+                            type: string
+                            format: date-time
+                          lat:
+                            type: number
+                          lng:
+                            type: string
+                      destination:
+                        type: object
+                        properties:
+                          address:
+                            type: string
+                          arrivalTime:
+                            type: string
+                            format: date-time
+                          city:
+                            type: string
+                          lat:
+                            type: number
+                          lng:
+                            type: string
+                      price:
+                        type: number
+                      tripCostWithTax:
+                        type: number
+                        description: Total trip cost including taxes based on booked seats. Used for driver side to see how much he will receive from riders in total
+                      estimatedPrice:
+                        type: number
+                        description: Estimated price based on given seats (if seats query param is provided). It includes rider taxes
+                      basecost:
+                        type: number
+                        description: Used on rider side detail screen . Actual cost based on number of seats
+                      appliedTaxesRider:
+                        type: array
+                        description: List of applied taxes with label and amount for rider
+                        items:
+                          type: object
+                          properties:
+                            label:
+                              type: string
+                            amount:
+                              type: number
+                      tripCostBreakDown:
+                        type: object
+                        description: Cost breakdown for driver
+                        properties:
+                          netEarning:
+                            type: number
+                          yassirFee:
+                            type: number
+                          driverToYassir:
+                            type: number
+                          yassirToDriver:
+                            type: number
+                          appliedTaxesRider:
+                            type: array
+                            description: List of applied taxes with label and amount for rider
+                            items:
+                              type: object
+                              properties:
+                                label:
+                                  type: string
+                                amount:
+                                  type: number
+                          appliedTaxesDriver:
+                            type: array
+                            description: List of applied taxes with label and amount for driver
+                            items:
+                              type: object
+                              properties:
+                                label:
+                                  type: string
+                                amount:
+                                  type: number
+                      maxSeats:
+                        type: number
+                      currency:
+                        type: string
+                      currencyLabel:
+                        type: string
+                      driverProfile:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                          phone:
+                            type: string
+                          picture:
+                            type: string
+                          name:
+                            type: string
+                          rating:
+                            type: number
+                          car:
+                            type: object
+                            properties:
+                              make:
+                                type: string
+                              model:
+                                type: string
+                              color:
+                                type: string
+                              immat:
+                                type: string
+                      bookings:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            seats:
+                              type: number
+                            riderProfile:
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                                rider:
+                                  type: string
+                                email:
+                                  type: string
+                                fullName:
+                                  type: string
+                                firstName:
+                                  type: string
+                                lastName:
+                                  type: string
+                                gender:
+                                  type: string
+                                phone:
+                                  type: string
+                                rating:
+                                  type: number
+                                reviewCount:
+                                  type: number
+                            riderPay:
+                              type: object
+                              properties:
+                                amount:
+                                  type: number
+                                amountWithTax:
+                                  type: number
+                                tax:
+                                  type: array
+                                  items:
+                                    type: object
+                                    properties:
+                                      label:
+                                        type: string
+                                      amount:
+                                        type: number
+              examples:
+                with-bookings:
+                  summary: Trip with bookings
+                  value:
+                    success: true
+                    trip:
+                      id: "6550f8a8e4b0a2f9c8b0e1a3"
+                      tripUid: "ABC123XYZ"
+                      status: "DRIVER_ASSIGNED"
+                      pickup:
+                        address: "Abadla, Béchar, Algérie"
+                        city: "Béchar"
+                        distance: 51997
+                        departureTime: "2026-02-01T10:00:00.000Z"
+                        lat: 31.021289
+                        lng: -2.719016
+                      destination:
+                        address: "Abalessa, Tamanrasset, Algérie"
+                        arrivalTime: "2026-02-01T10:00:00.000Z"
+                        city: "Tamanrasset"
+                        lat: 22.893424
+                        lng: 4.850719
+                      price: 800
+                      tripCostWithTax: 850
+                      estimatedPrice: 850
+                      basecost: 800
+                      tripCostBreakDown:
+                        netEarning: 608
+                        yassirFee: 160
+                        driverToYassir: 242
+                        yassirToDriver: 0
+                        appliedTaxesRider:
+                          - label: "Stamp Duty"
+                            amount: 50
+                        appliedTaxesDriver:
+                          - label: "Driver Benefit"
+                            amount: 32
+                      appliedTaxesRider:
+                        - label: "Stamp Duty"
+                          amount: 50
+                      maxSeats: 4
+                      currency: "DZD"
+                      currencyLabel: "DZD"
+                      driverProfile:
+                        id: "63a1853f465b7f0008e6f0e4"
+                        phone: "+213600000000"
+                        picture: "https://example.com/driver001.jpg"
+                        name: "John Doe"
+                        rating: 4.8
+                        car:
+                          make: "Toyota"
+                          model: "Corolla"
+                          color: "Blue"
+                          immat: "123-ABC-45"
+                      bookings:
+                        - id: "6550f8a8e4b0a2f9c8b0e1a4"
+                          seats: 2
+                          riderPay:
+                            amount: 850
+                            amountWithoutTax: 800
+                            tax:
+                              - label: "Stamp Duty"
+                                amount: 50
+                          riderProfile:
+                            id: "6550f8a8e4b0a2f9c8b0e1a5"
+                            rider: "6550f8a8e4b0a2f9c8b0e1a5"
+                            email: "rider1@example.com"
+                            fullName: "Alice Smith"
+                            gender: "female"
+                            phone: "+213600000001"
+                            rating: 4.5
+                            reviewCount: 10
+                no-bookings:
+                  summary: Trip with no bookings
+                  value:
+                    success: true
+                    trip:
+                      id: "6550f8a8e4b0a2f9c8b0e1a3"
+                      status: "DRIVER_ASSIGNED"
+                      pickup:
+                        address: "Abadla, Béchar, Algérie"
+                        city: "Béchar"
+                        distance: 51997
+                        departureTime: "2026-02-01T10:00:00.000Z"
+                        arrivalTime: "2026-02-01T10:00:00.000Z"
+                        lat: 31.021289
+                        lng: -2.719016
+                      destination:
+                        address: "Abalessa, Tamanrasset, Algérie"
+                        city: "Tamanrasset"
+                        lat: 22.893424
+                        lng: 4.850719
+                      price: 2500
+                      estimatedPrice: 2600
+                      basecost: 2500
+                      maxSeats: 4
+                      currency: "DZD"
+                      currencyLabel: "DZD"
+                      driverProfile:
+                        id: "63a1853f465b7f0008e6f0e4"
+                        phone: "+213600000000"
+                        picture: "https://example.com/driver001.jpg"
+                        name: "John Doe"
+                        rating: 4.8
+                        car:
+                          make: "Toyota"
+                          model: "Corolla"
+                          color: "Blue"
+                          immat: "123-ABC-45"
+                      bookings: []
+        '400':
+          description: Bad request, invalid or missing parameters
+          content:
+            application/json:
+              examples:
+                invalid_trip_id:
+                  summary: Invalid trip ID
+                  value:
+                    success: false
+                    errorMessageKey: "REQUIRED_FIELD_ERROR"
+                    errorMessage: "Trip ID is required and must be valid"
+                missing_driver_id:
+                  summary: Missing driver ID header
+                  value:
+                    success: false
+                    errorMessageKey: "REQUIRED_FIELD_ERROR"
+                    errorMessage: "Driver ID is required"
+
+        '403':
+          description: Forbidden - Not authorized to view this trip
+          content:
+            application/json:
+              examples:
+                unauthorized:
+                  summary: Not authorized to view trip
+                  value:
+                    success: false
+                    errorMessageKey: "VALIDATION_ERROR"
+                    errorMessage: "You are not authorized to view this trip"
+
+        '404':
+          description: Trip not found
+          content:
+            application/json:
+              examples:
+                not_found:
+                  summary: Trip not found
+                  value:
+                    success: false
+                    errorMessageKey: "NOT_FOUND"
+                    errorMessage: "Trip not found"
+
+        '500':
+          description: Server error
+          content:
+            application/json:
+              examples:
+                server_error:
+                  summary: Internal server error
+                  value:
+                    success: false
+                    errorMessageKey: "ERROR_TRIP_DETAIL"
+                    errorMessage: "Error in getting the trip detail"
+  /intercity/v1/validatePickup:
+    post:
+      summary: Validate driver's chosen pickup location if its in within the wilaya. actual path will be <baseurl>/b2c/driver/
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                pickupPath:
+                  type: string
+                  description: wilaya Path
+                pickupLocation:
+                  type: object
+                  description: Pickup location path
+                  properties:
+                    lat:
+                      type: number
+                      description: Latitude of the pickup location
+                    lng:
+                      type: number
+                      description: Longitude of the pickup location
+
+            examples:
+              basic:
+                summary: Example success request
+                value:
+                  pickupPath: "1258647,192756,0"
+                  pickupLocation:
+                    lat: 36.752887
+                    lng: 3.042048
+
+
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: validated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+
+              examples:
+                success:
+                  summary: Example successful response
+                  value:
+                    success: true
+                    message: "Location is validated"
+                error:
+                  summary: Example error response
+                  value:
+                    success: true
+                    message: "Location is not valid"
+
+
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              examples:
+                missing_fields:
+                  summary: Missing required fields
+                  value:
+                    success: false
+                    errorMessageKey: "REQUIRED_FIELD_ERROR"
+                    errorMessage: "Pickup path is required"
+
+
+        '500':
+          description: Server error
+          content:
+            application/json:
+              examples:
+                server_error:
+                  summary: Example error response
+                  value:
+                    success: false
+                    errorMessageKey: "ERROR_VALIDATE_LOCATION"
+                    errorMessage: "Error validating the pickup location"
+
+  /intercity/v1/create-trip:
+    post:
+      summary: Create a new intercity trip. actual path will be <baseurl>/b2c/driver/
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - pickup
+                - destination
+                - seats
+                - price
+                - departureTime
+              properties:
+                pickup:
+                  type: object
+                  description: Pickup location path
+                  properties:
+                    lat:
+                      type: number
+                      description: Latitude of the pickup location
+                    lng:
+                      type: number
+                      description: Longitude of the pickup location
+                    path:
+                      type: string
+                      description: Level 1 path of the city (wilaya)
+                destination:
+                  type: string
+                  description: Destination location path i.e level 2
+                seats:
+                  type: number
+                  minimum: 1
+                  description: Number of available seats
+                price:
+                  type: number
+                  minimum: 0
+                  description: Trip price per seat
+                departureTime:
+                  type: string
+                  format: date-time
+                preview:
+                  type: boolean
+            examples:
+              create-trip:
+                summary: Example create trip request
+                value:
+                  pickup:
+                    lat: 36.752887
+                    lng: 3.042048
+                    path: "0,192756,1258648"
+                  destination: "0,192756,1258648"
+                  seats: 4
+                  price: 2500
+                  departureTime: "2024-06-10T09:30:00Z"
+                  preview: true
+      responses:
+        '200':
+          description: Trip created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      tripId:
+                        type: string
+                      driverPotentialEarning:
+                        type: number
+                      pricePerSeat:
+                        type: number
+                      pricePerSeatWithTax:
+                        type: number
+                      appliedTaxesDriver:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            riderProfile:
+                              type: object
+                              properties:
+                                amount:
+                                  type: number
+                                label:
+                                  type: string
+
+                      appliedTaxesRider:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            riderProfile:
+                              type: object
+                              properties:
+                                amount:
+                                  type: number
+                                label:
+                                  type: string
+
+                      yassirFee:
+                        type: object
+                        properties:
+                          percent:
+                            type: number
+                          amount:
+                            type: number
+                      netEarning:
+                        type: number
+
+              examples:
+                success:
+                  summary: Example success response
+                  value:
+                    success: true
+                    data:
+                     tripId: "123456788"
+                     pricePerSeat: 400
+                     riderPay: 440
+                     yassirFee: {percent: 20, amount: 200}
+                     netEarning: 900
+                     appliedTaxesRider:
+                      - label: "Stamp"
+                        amount: 20
+                      - label: "Fix Tax"
+                        amount: 10
+
+                     appliedTaxesDriver:
+                      - label: "Flat Tax"
+                        amount: 5
+
+                     driverPotentialEarning: 1000
+
+
+        '400':
+          description: Bad request, invalid or missing parameters
+          content:
+            application/json:
+              examples:
+                bad_request:
+                  summary: Example bad request response
+                  value:
+                    success: false
+                    errorMessageKey: "REQUIRED_FIELD_ERROR"
+                    errorMessage: "Required fields are missing or invalid"
+                invalid_pickup:
+                  summary: Example of invalid location selection response
+                  value:
+                    success: false
+                    errorMessageKey: "INVALID_PICKUP_COORDINATES"
+                    errorMessage: "Pickup location is not within the specified city/wilaya"
+        '500':
+          description: Server error
+          content:
+            application/json:
+              examples:
+                create_error:
+                  summary: Example error response
+                  value:
+                    success: false
+                    errorMessageKey: "CREATE_TRIP_ERROR"
+                    errorMessage: "Error creating the trip"
+        '403':
+          description: Not allowed
+          content:
+            application/json:
+              examples:
+                create_error:
+                  summary: Example error response
+                  value:
+                    success: false
+                    errorMessageKey: "TIME_CONFLICT_ERROR"
+                    errorMessage: "Another trip at same time"
+
+  /intercity/v1/cancel-booking:
+    post:
+      summary: Cancel an intercity booking. actual path will be <baseurl>/b2c/rider/
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - bookingId
+              properties:
+                bookingId:
+                  type: string
+                  description: The ID of the booking to cancel
+                reasonId:
+                  type: string
+                  description: Optional ID of a cancel reason selected from GET /common/trips/cancelreasons (ObjectId)
+                reason:
+                  oneOf:
+                    - type: string
+                    - type: object
+                      properties:
+                        en:
+                          type: string
+                        fr:
+                          type: string
+                        ar:
+                          type: string
+                  description: Optional free-text reason or the catalog description object. String max 2000 chars
+                comment:
+                  type: string
+                  description: Optional free comment (max 1000 chars), only when comment_allowed=true
+                cancelReason:
+                  type: string
+                  description: Legacy alias for reason (accepted when reason is omitted)
+
+            examples:
+              cancel-request:
+                summary: Example cancel request
+                value:
+                  bookingId: "507f1f77bcf86cd799439011"
+              cancel-with-reason:
+                summary: Example cancel request with a catalog reason
+                value:
+                  bookingId: "507f1f77bcf86cd799439011"
+                  reasonId: "6ada09de864aa7c45a613318"
+                  reason:
+                    en: "I changed my mind"
+                    fr: "J'ai changé d'avis"
+                    ar: "لقد غيرت رأيي"
+                  comment: "Driver was late"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Booking canceled successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+
+              examples:
+                success:
+                  summary: Example successful response
+                  value:
+                    success: true
+                    message: "Booking canceled successfully"
+
+
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              examples:
+                missing_fields:
+                  summary: Missing required fields
+                  value:
+                    success: false
+                    errorMessageKey: "REQUIRED_FIELD_ERROR"
+                    errorMessage: "Booking ID is required and must be valid"
+                invalid_reason_id:
+                  summary: Invalid cancel reason ID
+                  value:
+                    success: false
+                    errorMessageKey: "REQUIRED_FIELD_ERROR"
+                    errorMessage: "Reason ID must be valid"
+                invalid_reason_type:
+                  summary: Invalid reason type
+                  value:
+                    success: false
+                    errorMessageKey: "REQUIRED_FIELD_ERROR"
+                    errorMessage: "Reason must be a string or an object"
+                reason_too_long:
+                  summary: Reason is too long
+                  value:
+                    success: false
+                    errorMessageKey: "REQUIRED_FIELD_ERROR"
+                    errorMessage: "Reason is too long"
+                invalid_comment_type:
+                  summary: Invalid comment type
+                  value:
+                    success: false
+                    errorMessageKey: "REQUIRED_FIELD_ERROR"
+                    errorMessage: "Comment must be a string"
+                comment_too_long:
+                  summary: Comment is too long
+                  value:
+                    success: false
+                    errorMessageKey: "REQUIRED_FIELD_ERROR"
+                    errorMessage: "Comment is too long"
+                already_canceled:
+                  summary: Booking already canceled
+                  value:
+                    success: false
+                    errorMessageKey: "ALREADY_CANCELED"
+                    errorMessage: "Booking is already canceled"
+                cancellation_window_expired:
+                  summary: Cancellation window expired
+                  value:
+                    success: false
+                    errorMessageKey: "VALIDATION_ERROR"
+                    errorMessage: "Cancellation window has expired. You cannot cancel this booking as the trip is too close to departure time"
+
+
+        '403':
+          description: Forbidden - Not authorized to cancel this booking
+          content:
+            application/json:
+              examples:
+                unauthorized:
+                  summary: Unauthorized access
+                  value:
+                    success: false
+                    errorMessageKey: "VALIDATION_ERROR"
+                    errorMessage: "You are not authorized to cancel this booking"
+
+        '404':
+          description: Booking not found
+          content:
+            application/json:
+              examples:
+                not_found:
+                  summary: Booking not found
+                  value:
+                    success: false
+                    errorMessageKey: "NOT_FOUND"
+                    errorMessage: "Booking not found"
+
+        '500':
+          description: Server error
+          content:
+            application/json:
+              examples:
+                server_error:
+                  summary: Example error response
+                  value:
+                    success: false
+                    errorMessageKey: "ERROR_CANCEL_BOOKING"
+                    errorMessage: "Error canceling the intercity booking"
+
+  /intercity/v1/level2-locations:
+    get:
+      summary: Get list of level 2 locations of given level 1
+      parameters:
+        - in: header
+          name: yassir-app-language
+          required: false
+          schema:
+            type: string
+          description: Preferred language for the response (e.g. en, fr, ar)
+        - in: query
+          name: level1Path
+          required: true
+          schema:
+            type: string
+
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response with pickup list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    nullable: true
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          description: Object Id
+                        name:
+                          type: string
+                          description: App language based
+                        path:
+                          type: string
+                          description: Path string
+              examples:
+                with-data:
+                  summary: Example with some data
+                  value:
+                    success: true
+                    data:
+                     - id: "123456788"
+                       name: "Abadla"
+                       path: "6531119,1258647,192756,0"
+                     - id: "123456789"
+                       name: "Bechar"
+                       path: "6531015,1258647,192756,0"
+                empty:
+                  summary: Example with empty data
+                  value:
+                    success: true
+                    data: []
+                arabic:
+                  summary: Example with arabic data
+                  value:
+                    success: true
+                    data:
+                     - id: "123456788"
+                       name: "دائرة العبادلة"
+                       path: "6531119,1258647,192756,0"
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              examples:
+                pickup_error:
+                  summary: Without Service Family Id
+                  value:
+                    success: false
+                    data: null
+                    errorMessageKey: "FAMILYID_REQUIRED"
+                    errorMessage: "Service Family Id required"
+        '500':
+          description: Server error
+          content:
+            application/json:
+              examples:
+                pickup_error:
+                  summary: Example error response
+                  value:
+                    success: false
+                    data: null
+                    errorMessageKey: "ERROR_PICKUP_LIST"
+                    errorMessage: "Error in getting the list of pickups"
+  /intercity/v1/active-trip:
+    get:
+      summary: Get active trip of rider. actual path will be <baseurl>/b2c/rider/
+      parameters:
+        - in: header
+          name: yassir-app-language
+          required: false
+          schema:
+            type: string
+          description: Preferred language for the response (e.g. en, fr, ar)
+        - in: query
+          name: location
+          required: false
+          schema:
+            type: string
+          description: Location of rider comma separated lat,lng
+
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response with active trip
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  trip:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      pickup:
+                        type: object
+                        properties:
+                          address:
+                            type: string
+                          city:
+                            type: string
+                          distance:
+                            type: number
+                          departureTime:
+                            type: string
+                            format: date-time
+                          arrivalTime:
+                            type: string
+                            format: date-time
+                          lat:
+                            type: number
+                          lng:
+                            type: string
+                      destination:
+                        type: object
+                        properties:
+                          address:
+                            type: string
+                          city:
+                            type: string
+                          lat:
+                            type: number
+                          lng:
+                            type: string
+                      bookings:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            isPrivate:
+                              type: string
+                            riderProfile:
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                                rider:
+                                  type: string
+                                email:
+                                  type: string
+                                fullName:
+                                  type: string
+                                gender:
+                                  type: string
+                                phone:
+                                  type: string
+                                rating:
+                                  type: number
+                                reviewCount:
+                                  type: number
+                      paymentMethod:
+                        type: string
+                      price:
+                        type: number
+                      currency:
+                        type: string
+                      currencyLabel:
+                        type: string
+                      remainingSeats:
+                        type: number
+                      driverProfile:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                          phone:
+                            type: string
+                          picture:
+                            type: string
+                          name:
+                            type: string
+                          rating:
+                            type: number
+                          car:
+                            type: object
+                            properties:
+                              make:
+                                type: string
+                              model:
+                                type: string
+                              color:
+                                type: string
+                              immat:
+                                type: string
+
+
+              examples:
+                with-trip:
+                  summary: Example with trip
+                  value:
+                    success: true
+                    trip:
+                        id: "trip001"
+                        pickup:
+                          lat: 36.47
+                          lng: 3.09
+                          address: "123 Main St"
+                          city: "Blida"
+                          distance: 1200
+                          departureTime: "2024-06-10T09:30:00Z"
+                        destination:
+                          address: "456 Elm St"
+                          city: "Oran"
+                          arrivalTime: "2024-06-10T09:30:00Z"
+                          lat: 36.74
+                          lng: 3.09
+
+                        paymentMethod: "CASH"
+                        price: 2500
+                        currency: "DZD"
+                        currencyLabel: "DZ"
+                        remainingSeats: 2
+                        bookings:
+                          - id: "123456788"
+                            seats: 1
+                            isPrivate: false
+                            riderProfile:
+                              id: ""
+                              fullName: "Usman"
+                              gender: "male"
+                              rating: 4
+                              firstName: "Usman"
+                              lastName: "Qamar"
+                              reviewCount: 10
+                              phone: "+12345678"
+
+
+                        driverProfile:
+                          id: "driver001"
+                          phone: "+213600000000"
+                          picture: "https://example.com/driver001.jpg"
+                          name: "John Doe"
+                          rating: 4.8
+                          car:
+                            make: "Toyota"
+                            model: "Corolla"
+                            color: "Blue"
+                            immat: "123-XYZ"
+
+                with-private:
+                  summary: Example with private ride
+                  value:
+                    success: true
+                    trip:
+                        id: "trip001"
+                        pickup:
+                          lat: 36.47
+                          lng: 3.09
+                          address: "123 Main St"
+                          city: "Blida"
+                          distance: 1200
+                          departureTime: "2024-06-10T09:30:00Z"
+                        destination:
+                          address: "456 Elm St"
+                          city: "Oran"
+                          arrivalTime: "2024-06-10T09:30:00Z"
+                          lat: 36.74
+                          lng: 3.09
+
+                        paymentMethod: "CASH"
+                        price: 2500
+                        currency: "DZD"
+                        currencyLabel: "DZ"
+                        remainingSeats: 2
+                        bookings:
+                          - id: "123456788"
+                            seats: 1
+                            isPrivate: true
+                            riderProfile:
+                              id: ""
+                              fullName: "Usman"
+                              gender: "male"
+                              rating: 4
+                              firstName: "Usman"
+                              lastName: "Qamar"
+                              reviewCount: 10
+                              phone: "+12345678"
+
+
+                        driverProfile:
+                          id: "driver001"
+                          phone: "+213600000000"
+                          picture: "https://example.com/driver001.jpg"
+                          name: "John Doe"
+                          rating: 4.8
+                          car:
+                            make: "Toyota"
+                            model: "Corolla"
+                            color: "Blue"
+                            immat: "123-XYZ"
+
+                no-data:
+                  summary: Example with no trip
+                  value:
+                    success: true
+                    trip: null
+
+        '500':
+          description: Server error
+          content:
+            application/json:
+              examples:
+                pickup_error:
+                  summary: Example error response
+                  value:
+                    success: false
+                    trip: null
+                    errorMessageKey: "ERROR_ACTIVE_TRIP"
+                    errorMessage: "Error in getting the active trip"
+  /intercity/v1/pickup:
+    get:
+      summary: Get list of pickups configured. actual path will be <baseurl>/b2c/common/
+      parameters:
+        - in: header
+          name: yassir-app-language
+          required: false
+          schema:
+            type: string
+          description: Preferred language for the response (e.g. en, fr, ar)
+        - in: query
+          name: location
+          required: false
+          schema:
+            type: string
+          description: lat,lng
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response with pickup list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    nullable: true
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          description: Object Id
+                        code:
+                          type: string
+                          description: Optional string
+                        name:
+                          type: string
+                          description: App language based
+                        path:
+                          type: string
+                          description: Path string
+              examples:
+                with-data:
+                  summary: Example with some data
+                  value:
+                    success: true
+                    data:
+                      - id: "123456788"
+                        code: "11"
+                        name: "Blida"
+                        path: "0,192756,1258647"
+                      - id: "123456788"
+                        code: "12"
+                        name: "Oran"
+                        path: "0,192756,1258647"
+                empty:
+                  summary: Example with empty data
+                  value:
+                    success: true
+                    data: []
+                arabic:
+                  summary: Example with arabic data
+                  value:
+                    success: true
+                    data:
+                      - id: "123456788"
+                        code: "11"
+                        name: "البليدة"
+                        path: "0,192756,1258647"
+                      - id: "123456788"
+                        code: "12"
+                        name: "وهران"
+                        path: "0,192756,1258647"
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              examples:
+                pickup_error:
+                  summary: Without Service Family Id
+                  value:
+                    success: false
+                    data: null
+                    errorMessageKey: "FAMILYID_REQUIRED"
+                    errorMessage: "Service Family Id required"
+        '500':
+          description: Server error
+          content:
+            application/json:
+              examples:
+                pickup_error:
+                  summary: Example error response
+                  value:
+                    success: false
+                    data: null
+                    errorMessageKey: "ERROR_PICKUP_LIST"
+                    errorMessage: "Error in getting the list of pickups"
+  /intercity/v1/destination/{pickup}:
+    get:
+      summary: Get list of destinations for a pickup path configured. actual path will be <baseurl>/b2c/common/
+      parameters:
+        - name: pickup
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The pickup path string
+
+        - in: header
+          name: yassir-app-language
+          required: false
+          schema:
+            type: string
+          description: Preferred language for the response (e.g. en, fr, ar)
+
+      responses:
+        '200':
+          description: Successful response with destination list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    nullable: true
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          description: Object Id
+                        code:
+                          type: string
+                          description: Optional string
+                        name:
+                          type: string
+                          description: App language based
+                        path:
+                          type: string
+                          description: Path string
+              examples:
+                with-data:
+                  summary: Example with data
+                  value:
+                    success: true
+                    data:
+                      - id: "123456788"
+                        code: "11"
+                        name: "Blida"
+                        path: "0,192756,1258647"
+                      - id: "123456788"
+                        code: "11"
+                        name: "Oran"
+                        path: "0,192756,1258647"
+                empty:
+                  summary: Example with empty data
+                  value:
+                    success: true
+                    data: []
+                arabic:
+                  summary: Example with arabic data
+                  value:
+                    success: true
+                    data:
+                      - id: "123456788"
+                        code: "11"
+                        name: "البليدة"
+                        path: "0,192756,1258647"
+                      - id: "123456788"
+                        code: "12"
+                        name: "وهران"
+                        path: "0,192756,1258647"
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              examples:
+                destination_error_400:
+                  summary: Example 400 error response
+                  value:
+                    success: false
+                    data: null
+                    errorMessageKey: "REQUIRED_FIELD_ERROR"
+                    errorMessage: "Error in getting the list of destinations"
+        '500':
+            description: Server error
+            content:
+              application/json:
+                examples:
+                  destination_error:
+                    summary: Example 500 error response
+                    value:
+                      success: false
+                      data: null
+                      errorMessageKey: "ERROR_DESTINATION_LIST"
+                      errorMessage: "Error in getting the list of destinations"
+  /intercity/v1/config:
+    get:
+      summary: Get config of a service. actual path will be <baseurl>/b2c/common/
+
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response with config keys
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  bookingMinTime:
+                    type: number
+                    description: Minimum time for future booking
+                  bookingMaxTime:
+                    type: number
+                    description: Maximum time for future booking
+                  maxSeats:
+                    type: number
+                    description: Number of seats in car
+                  path:
+                    type: string
+                    description: Path string
+              examples:
+                with-data:
+                  summary: Example with some data
+                  value:
+                    maxSeats: 4
+                    bookingMinTime: 1762142400000
+                    bookingMaxTime: 1763236800000
+
+        '500':
+          description: Server error
+          content:
+            application/json:
+              examples:
+                pickup_error:
+                  summary: Example error response
+                  value:
+                    success: false
+                    data: null
+                    errorMessageKey: "ERROR_INTERCITY_CONFIG"
+                    errorMessage: "Error in getting the config for the service"
+  /intercity/v1/search-trips:
+    post:
+      summary: Search available intercity trips. actual path will be <baseurl>/b2c/rider/
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                datetime:
+                  type: string
+                  format: date-time
+                  description: Date and time for the trip (ISO 8601 format)
+                pickup:
+                  type: string
+                  description: Pickup location path
+                destination:
+                  type: string
+                  description: Destination location path
+                seats:
+                  type: number
+                  description: Number of seats required
+                isPrivate:
+                  type: boolean
+                  description: If rider is looking for empty car
+                location:
+                  type: object
+                  description: Location of user
+                  properties:
+                    lat:
+                      type: number
+                    lng:
+                      type: number
+
+
+            examples:
+              search-request:
+                summary: Example search request
+                value:
+                  datetime: "2024-06-10T09:00:00Z"
+                  pickup: "0,192756,1258647"
+                  destination: "0,192756,1258647"
+                  seats: 2
+                  isPrivate: true
+                  location:
+                    lat: 3.123
+                    lng: 2.123
+      responses:
+        '200':
+          description: Successful response with available trips
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  trips:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        tripUid:
+                          type: string
+                        pickup:
+                          type: object
+                          properties:
+                            address:
+                              type: string
+                            city:
+                              type: string
+                            distance:
+                              type: number
+                            departureTime:
+                              type: string
+                              format: date-time
+                            arrivalTime:
+                              type: string
+                              format: date-time
+                        destination:
+                          type: object
+                          properties:
+                            address:
+                              type: string
+                            city:
+                              type: string
+                        paymentMethod:
+                          type: string
+                        price:
+                          type: number
+                        currency:
+                          type: string
+                        currencyLabel:
+                          type: string
+                        remainingSeats:
+                          type: number
+                        driverProfile:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            phone:
+                              type: string
+                            picture:
+                              type: string
+                            name:
+                              type: string
+                            rating:
+                              type: number
+                            car:
+                              type: object
+                              properties:
+                                make:
+                                  type: string
+                                model:
+                                  type: string
+                                color:
+                                  type: string
+                                immat:
+                                  type: string
+
+
+                  requests:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        joined:
+                          type: boolean
+                        pickup:
+                          type: object
+                          properties:
+                            departureTime:
+                              type: string
+                              format: date-time
+                            city:
+                              type: string
+                        destination:
+                          type: object
+                          properties:
+                            arrivalTime:
+                              type: string
+                              format: date-time
+                            city:
+                              type: string
+
+
+              examples:
+                with-trips:
+                  summary: Example with trips
+                  value:
+                    success: true
+                    trips:
+                      - id: "trip001"
+                        tripUid: "XYZXYZXYZ"
+                        pickup:
+                          address: "123 Main St"
+                          city: "Blida"
+                          distance: 1200
+                          departureTime: "2024-06-10T09:30:00Z"
+                        destination:
+                          address: "456 Elm St"
+                          city: "Oran"
+                          arrivalTime: "2024-06-10T09:30:00Z"
+
+                        paymentMethod: "CASH"
+                        price: 2500
+                        currency: "DZD"
+                        currencyLabel: "DZ"
+                        remainingSeats: 2
+                        driverProfile:
+                          id: "driver001"
+                          phone: "+213600000000"
+                          picture: "https://example.com/driver001.jpg"
+                          name: "John Doe"
+                          rating: 4.8
+                          car:
+                            make: "Toyota"
+                            model: "Corolla"
+                            color: "Blue"
+                            immat: "123-XYZ"
+                      - id: "trip002"
+                        tripUid: "XYZXYZXYZ"
+                        pickup:
+                          address: "123 Main St"
+                          city: "Blida"
+                          distance: 1200
+                          departureTime: "2024-06-10T09:30:00Z"
+
+                        destination:
+                          address: "456 Elm St"
+                          city: "Oran"
+                          arrivalTime: "2024-06-10T09:30:00Z"
+
+                        paymentMethod: "CASH"
+                no-data:
+                  summary: Example with no trips and requests
+                  value:
+                    success: true
+                    trips: []
+        '400':
+          description: Bad request, invalid or missing parameters
+          content:
+            application/json:
+              examples:
+                bad_request:
+                  summary: Example bad request response
+                  value:
+                    success: false
+                    trips: null
+                    errorMessageKey: "REQUIRED_FIELD_ERROR"
+                    errorMessage: "Invalid or missing parameters"
+        '500':
+          description: Server error
+          content:
+            application/json:
+              examples:
+                search_error:
+                  summary: Example error response
+                  value:
+                    success: false
+                    trips: null
+                    errorMessageKey: "ERROR_SEARCH_TRIPS"
+                    errorMessage: "Error searching for trips"
+  /intercity/v1/search-trips-stats:
+    post:
+      summary: Count intercity trips per local day for the next N local days (day-tabbed)
+      description: |
+        Returns, per rider-local calendar date, the count of bookable trips on a route across
+        INTERCITY_SEARCH_WINDOW_DAYS calendar days (default 14), starting from the rider's local
+        "today" (Day 0, resolved from the `user_country` header) through local today+(N-1). The
+        window starts at the exact current instant, not local midnight - e.g. a request at 00:30
+        local on day X counts trips from 00:30 onward on day X through the end of day X+(N-1).
+        Dates with zero matching trips are omitted from the response, EXCEPT the local calendar
+        date of the request's `departureTime` (the day the caller is currently viewing), which is
+        always included even when its count is 0. No caching - every request is a fresh DB read.
+      parameters:
+        - in: header
+          name: rider_id
+          required: true
+          description: Rider ID
+          schema:
+            type: string
+          example: 66fcf4a1c5978cc125b75155
+        - in: header
+          name: user_country
+          required: true
+          description: ISO2 country code, used to resolve the rider's local timezone for day bucketing
+          schema:
+            type: string
+            
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - pickup
+                - destination
+                - departureTime
+              properties:
+                pickup:
+                  type: string
+                  description: Pickup location path
+                destination:
+                  type: string
+                  description: Destination location path
+                seats:
+                  type: number
+                  description: Number of seats required (required unless isPrivate)
+                isPrivate:
+                  type: boolean
+                  description: Whether the trip is private
+                departureTime:
+                  type: string
+                  format: date-time
+                  description: |
+                    Reference departure time in UTC. Converted to the rider's local calendar
+                    date (via `user_country`) - that date is always included in the response,
+                    even when its trip count is 0.
+            examples:
+              search-request:
+                summary: Example search request
+                value:
+                  pickup: "0,192756,1258647"
+                  destination: "0,192756,1258647"
+                  seats: 2
+                  isPrivate: false
+                  departureTime: "2026-09-20T09:30:00Z"
+      responses:
+        '200':
+          description: Successful response with per-day trip counts
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    description: |
+                      One entry per local calendar date with a nonzero trip count, plus the
+                      requested date's entry even when its count is 0. Sorted ascending.
+                    items:
+                      type: object
+                      description: Bookable-trip count for one of the rider's local calendar dates.
+                      properties:
+                        date:
+                          type: string
+                          description: Rider's local calendar date (YYYY-MM-DD)
+                        count:
+                          type: number
+                          description: Number of bookable trips on that local date
+              examples:
+                with-trips:
+                  summary: Example with counts on a couple of days, including the requested (empty) day
+                  value:
+                    success: true
+                    data:
+                      - date: "2026-09-20"
+                        count: 0
+                      - date: "2026-09-22"
+                        count: 10
+        '400':
+          description: Bad request, invalid or missing parameters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  data:
+                    type: object
+                    nullable: true
+                    example: null
+                  errorMessageKey:
+                    type: string
+                  errorMessage:
+                    type: string
+              examples:
+                bad_request:
+                  summary: Example bad request response
+                  value:
+                    success: false
+                    errorMessageKey: "REQUIRED_FIELD_ERROR"
+                    errorMessage: "Invalid or missing parameters"
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  data:
+                    type: object
+                    nullable: true
+                    example: null
+                  errorMessageKey:
+                    type: string
+                  errorMessage:
+                    type: string
+              examples:
+                search_error:
+                  summary: Example error response
+                  value:
+                    success: false
+                    errorMessageKey: "ERROR_SEARCH_TRIPS"
+                    errorMessage: "Error searching for trips"
+  /intercity/v2/search-trips:
+    post:
+      summary: Cursor-paginated search for available intercity trips on a specific local day
+      description: |
+
+        Same search body as v1/search-trips (pickup, destination, seats, isPrivate, location),
+
+        except in place of a precise UTC `datetime` it takes a rider-local calendar `date`
+
+        (YYYY-MM-DD, resolved via `user_country`). Returns trips departing from "now" (if the
+
+        date is today) through the end of that local date, cursor-paginated and sorted by
+
+
+      parameters:
+        - in: header
+          name: rider_id
+          required: true
+          description: Rider ID
+          schema:
+            type: string
+          example: 66fcf4a1c5978cc125b75155
+
+        - in: header
+
+          name: user_country
+
+          required: true
+
+          description: ISO2 country code, used to resolve the rider's local timezone for day bucketing
+
+          schema:
+
+            type: string
+
+        - in: header
+          name: app_language
+          required: false
+          description: Preferred language for currency label (e.g. en, fr, ar)
+          schema:
+            type: string
+            default: en
+
+        - in: query
+          name: cursor
+          required: false
+          description: next cursor
+          schema:
+            type: string
+        - in: query
+          name: limit
+          required: false
+          description: per page szie
+          schema:
+            type: number
+
+      requestBody:
+
+        required: true
+
+        content:
+
+          application/json:
+
+            schema:
+
+              type: object
+
+              required:
+
+                - pickup
+                - destination
+                - date
+                - seats
+
+              properties:
+
+                pickup:
+
+                  type: string
+
+                  description: Pickup location path
+
+                destination:
+
+                  type: string
+
+                  description: Destination location path
+
+                seats:
+
+                  type: number
+
+                  description: Number of seats required (required unless isPrivate)
+
+                isPrivate:
+
+                  type: boolean
+
+                  description: Whether the trip is private
+
+                date:
+
+                  type: string
+
+                  description: |
+
+                    Rider-local calendar date to search (YYYY-MM-DD), resolved via `user_country`.
+
+                    Trips are searched from "now" (if `date` is today) or local midnight (if a
+
+                    future date) through the end of that local date.
+
+                cursor:
+
+                  type: string
+
+                  description: Opaque pagination cursor from a previous response's `nextCursor`
+
+                limit:
+
+                  type: number
+
+                  description: Page size (default 10, max 50)
+
+                location:
+
+                  type: object
+
+                  description: Location of user (optional)
+
+                  properties:
+
+                    lat:
+
+                      type: number
+
+                      example: 36.734546
+
+                    lng:
+
+                      type: number
+
+                      example: 3.027710
+
+            examples:
+
+              search-request:
+                summary: Example search request
+
+                value:
+                  pickup: "0,192756,1258647"
+                  destination: "0,192756,1258647"
+                  seats: 2
+                  isPrivate: false
+                  date: "2026-09-25"
+                  location:
+                    lat: 3.123
+                    lng: 2.123
+
+      responses:
+
+        '200':
+
+          description: Successful response with a page of trips for the given local day
+
+          content:
+
+            application/json:
+
+              schema:
+
+                type: object
+
+                properties:
+
+                  success:
+
+                    type: boolean
+
+                  trips:
+
+                    type: array
+
+                    items:
+
+                      type: object
+
+                      description: |
+
+                        Shared intercity trip shape. Not every endpoint returns every field -
+
+                        each response only sets the subset relevant to it.
+
+                      properties:
+
+                        id:
+
+                          type: string
+
+                        tripUid:
+
+                          type: string
+
+                        status:
+
+                          type: string
+
+                        pickup:
+
+                          type: object
+
+                          properties:
+
+                            address:
+
+                              type: string
+
+                            city:
+
+                              type: string
+
+                            distance:
+
+                              type: number
+
+                            departureTime:
+
+                              type: string
+
+                              format: date-time
+
+                            arrivalTime:
+
+                              type: string
+
+                              format: date-time
+
+                            lat:
+
+                              type: number
+
+                            lng:
+
+                              type: number
+
+                        destination:
+
+                          type: object
+
+                          properties:
+
+                            address:
+
+                              type: string
+
+                            city:
+
+                              type: string
+
+                            distance:
+
+                              type: number
+
+                            departureTime:
+
+                              type: string
+
+                              format: date-time
+
+                            arrivalTime:
+
+                              type: string
+
+                              format: date-time
+
+                            lat:
+
+                              type: number
+
+                            lng:
+
+                              type: number
+
+                        price:
+
+                          type: number
+
+                        tripCostWithTax:
+
+                          type: number
+
+                        baseCost:
+
+                          type: number
+
+                        estimatedPrice:
+
+                          type: number
+
+                        appliedTaxesRider:
+
+                          type: array
+
+                          items:
+
+                            type: object
+
+                            properties:
+
+                              label:
+
+                                type: string
+
+                              amount:
+
+                                type: number
+
+                        tripCostBreakDown:
+
+                          type: object
+
+                          properties:
+
+                            netEarning:
+
+                              type: number
+
+                            yassirFee:
+
+                              type: number
+
+                            driverToYassir:
+
+                              type: number
+
+                            yassirToDriver:
+
+                              type: number
+
+                            appliedTaxesRider:
+
+                              type: array
+
+                              items:
+
+                                type: object
+
+                                properties:
+
+                                  label:
+
+                                    type: string
+
+                                  amount:
+
+                                    type: number
+
+                            appliedTaxesDriver:
+
+                              type: array
+
+                              items:
+
+                                type: object
+
+                                properties:
+
+                                  label:
+
+                                    type: string
+
+                                  amount:
+
+                                    type: number
+
+                        maxSeats:
+
+                          type: number
+
+                        remainingSeats:
+
+                          type: number
+
+                        currency:
+
+                          type: string
+
+                        currencyLabel:
+
+                          type: string
+
+                        paymentMethod:
+
+                          type: string
+
+                        driverProfile:
+
+                          type: object
+
+                          properties:
+
+                            id:
+
+                              type: string
+
+                            phone:
+
+                              type: string
+
+                            picture:
+
+                              type: string
+
+                            name:
+
+                              type: string
+
+                            rating:
+
+                              type: number
+
+                            car:
+
+                              type: object
+
+                              properties:
+
+                                make:
+
+                                  type: string
+
+                                model:
+
+                                  type: string
+
+                                color:
+
+                                  type: string
+
+                                immat:
+
+                                  type: string
+
+                                plateNumber:
+
+                                  type: string
+
+                        bookings:
+
+                          type: array
+
+                          items:
+
+                            type: object
+
+                            properties:
+
+                              id:
+
+                                type: string
+
+                              seats:
+
+                                type: number
+
+                              isPrivate:
+
+                                type: boolean
+
+                              riderPay:
+
+                                type: object
+
+                                properties:
+
+                                  amount:
+
+                                    type: number
+
+                                  amountWithTax:
+
+                                    type: number
+
+                                  tax:
+
+                                    type: array
+
+                                    items:
+
+                                      type: object
+
+                                      properties:
+
+                                        label:
+
+                                          type: string
+
+                                        amount:
+
+                                          type: number
+
+                              riderProfile:
+
+                                type: object
+
+                                properties:
+
+                                  id:
+
+                                    type: string
+
+                                  rider:
+
+                                    type: string
+
+                                  email:
+
+                                    type: string
+
+                                  fullName:
+
+                                    type: string
+
+                                  firstName:
+
+                                    type: string
+
+                                  lastName:
+
+                                    type: string
+
+                                  gender:
+
+                                    type: string
+
+                                  phone:
+
+                                    type: string
+
+                                  rating:
+
+                                    type: number
+
+                                  reviewCount:
+
+                                    type: number
+
+                  nextCursor:
+
+                    type: string
+
+                    nullable: true
+
+                    description: Opaque cursor for the next page; null when there are no more results
+
+                  hasMore:
+
+                    type: boolean
+
+              examples:
+
+                with-trips:
+
+                  summary: Example with a page of trips
+
+                  value:
+
+                    success: true
+
+                    trips:
+
+                      - id: "trip001"
+
+                        tripUid: "XXXXXXX"
+
+                        pickup:
+
+                          address: "123 Main St"
+
+                          city: "Blida"
+
+                          departureTime: "2026-09-25T09:30:00Z"
+
+                        destination:
+
+                          address: "456 Elm St"
+
+                          city: "Oran"
+
+                          arrivalTime: "2026-09-25T12:30:00Z"
+
+                        paymentMethod: "CASH"
+
+                        price: 2500
+
+                        currency: "DZD"
+
+                        remainingSeats: 2
+
+                    nextCursor: "MjAyNi0wOS0yNVQwOTozMDowMC4wMDBaf2FiYzEyMw=="
+
+                    hasMore: true
+
+        '400':
+
+          description: Bad request, invalid or missing parameters
+
+          content:
+
+            application/json:
+
+              schema:
+
+                type: object
+
+                properties:
+
+                  success:
+
+                    type: boolean
+
+                    example: false
+
+                  data:
+
+                    type: object
+
+                    nullable: true
+
+                    example: null
+
+                  errorMessageKey:
+
+                    type: string
+
+                  errorMessage:
+
+                    type: string
+
+              examples:
+
+                bad_request:
+
+                  summary: Example bad request response
+
+                  value:
+
+                    success: false
+
+                    errorMessageKey: "REQUIRED_FIELD_ERROR"
+
+                    errorMessage: "Invalid or missing parameters"
+
+        '500':
+
+          description: Server error
+
+          content:
+
+            application/json:
+
+              schema:
+
+                type: object
+
+                properties:
+
+                  success:
+
+                    type: boolean
+
+                    example: false
+
+                  data:
+
+                    type: object
+
+                    nullable: true
+
+                    example: null
+
+                  errorMessageKey:
+
+                    type: string
+
+                  errorMessage:
+
+                    type: string
+
+              examples:
+
+                search_error:
+
+                  summary: Example error response
+
+                  value:
+
+                    success: false
+
+                    errorMessageKey: "ERROR_SEARCH_TRIPS"
+
+                    errorMessage: "Error searching for trips"
+  /intercity/v1/pricing:
+    post:
+      summary: Get pricing config of a service
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                pickup:
+                  type: string
+                  description: Pickup location path
+                destination:
+                  type: string
+                  description: Destination location path
+
+
+
+            examples:
+              search-request:
+                summary: Example search request
+                value:
+                  pickup: "0,192756,1258647"
+                  destination: "0,192756,1258647"
+
+      parameters:
+        - in: header
+          name: yassir-app-language
+          required: false
+          schema:
+            type: string
+          description: Preferred language for the response (e.g. en, fr, ar)
+
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response with config keys
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  minPrice:
+                    type: number
+                    description: Minimum price for this trip
+                  maxPrice:
+                    type: number
+                    description: Maximum price for this trip
+                  recomendedPrice:
+                    type: number
+                    description: Recomended price for this trip
+                  currencyLabel:
+                    type: string
+                    description: Currency in the given language
+                  currency:
+                    type: string
+                    description: Currency
+
+              examples:
+                with-data:
+                  summary: Example with some data
+                  value:
+                    minPrice: 2000
+                    maxPrice: 3000
+                    recomendedPrice: 1500
+                    currency: "DZD"
+                    currencyLabel: "DZ"
+                with-data-ar:
+                  summary: Example with some arabic
+                  value:
+                    minPrice: 2000
+                    maxPrice: 3000
+                    recomendedPrice: 1500
+                    currencyLabel: "دج"
+                    currency: "DZ"
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              examples:
+                destination_error_400:
+                  summary: Example 400 error response
+                  value:
+                    success: false
+                    data: null
+                    errorMessageKey: "REQUIRED_FIELD_ERROR"
+                    errorMessage: "Error in getting the pricing config"
+        '500':
+          description: Server error
+          content:
+            application/json:
+              examples:
+                pickup_error:
+                  summary: Example error response
+                  value:
+                    success: false
+                    data: null
+                    errorMessageKey: "ERROR_INTERCITY_PRICING"
+                    errorMessage: "Error in getting the pricing config for the trip"
+  /intercity/v1/trip/book:
+    post:
+      summary: Post a request for booking. actual path will be <baseurl>/b2c/rider/
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tripId:
+                  type: string
+                  description: trip id
+                seats:
+                  type: number
+                  description: number of seats to book
+                isPrivate:
+                  type: boolean
+
+
+            examples:
+              book-request:
+                summary: Book Private
+                value:
+                  tripId: "68e51fbe690abd6a343a8c45"
+                  isPrivate: true
+              book-request-2:
+                summary: Book non private
+                value:
+                  tripId: "68e51fbe690abd6a343a8c45"
+                  isPrivate: false
+                  seats: 2
+
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response with booking id
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  bookingId:
+                    type: number
+                    description: Booking Id
+
+              examples:
+                with-data:
+                  summary: Example with some data
+                  value:
+                    success: true
+                    bookingId: "68e51fbe690abd6a343a8c45"
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              examples:
+                bad_request:
+                  summary: Example 400 error response
+                  value:
+                    success: false
+                    data: null
+                    errorMessageKey: "REQUIRED_FIELD_ERROR"
+                    errorMessage: "Error in booking the trip"
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              examples:
+                forbidden:
+                  summary: Example 403 error response
+                  value:
+                    success: false
+                    data: null
+                    errorMessageKey: "BOOKING_NOT_ALLOWED"
+                    errorMessage: "Error in booking the trip"
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              examples:
+                forbidden:
+                  summary: Example 404 error response
+                  value:
+                    success: false
+                    data: null
+                    errorMessageKey: "TRIP_NOT_FOUND"
+                    errorMessage: "Error in booking the trip"
+        '500':
+          description: Server error
+          content:
+            application/json:
+              examples:
+                pickup_error:
+                  summary: Example error response
+                  value:
+                    success: false
+                    data: null
+                    errorMessageKey: "ERROR_INTERCITY_PRICING"
+                    errorMessage: "Error in getting the pricing config for the trip"
+  /intercity/v1/{driverId}/driver-insights:
+    get:
+      summary: Get driver insights and statistics.
+      parameters:
+        - name: driverId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the driver
+
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response with driver insights
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      numberOfRides:
+                        type: number
+                        description: Total number of rides completed by driver
+                      driverJoinedAt:
+                        type: string
+                        format: date-time
+                        description: Date when driver joined the platform
+                      daysSinceDriverJoined:
+                        type: number
+                        description: Number of days since driver joined
+                      driverApprovedForTripsAt:
+                        type: string
+                        format: date-time
+                        nullable: true
+                        description: Date when driver was approved for trips
+                      daysSinceDriverApproved:
+                        type: number
+                        nullable: true
+                        description: Number of days since driver was approved
+                      driverInsights:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            _id:
+                              type: string
+                            driverReviewCode:
+                              type: string
+                            description:
+                              type: object
+                              properties:
+                                en:
+                                  type: string
+                                fr:
+                                  type: string
+                                ar:
+                                  type: string
+                            icon:
+                              type: string
+                            category:
+                              type: string
+                            foregroundColor:
+                              type: string
+                            backgroundColor:
+                              type: string
+                            count:
+                              type: number
+              examples:
+                with-data:
+                  summary: Example with driver insights
+                  value:
+                    success: true
+                    message: "Driver insights successfully retrieved"
+                    data:
+                      numberOfRides: 2653
+                      driverJoinedAt: "2017-08-22T16:35:16.997Z"
+                      daysSinceDriverJoined: 2996
+                      driverApprovedForTripsAt: null
+                      daysSinceDriverApproved: null
+                      driverInsights:
+                        - _id: "685d5828ef5984005a1c16a3"
+                          driverReviewCode: "REV-1741629974153-2960"
+                          description:
+                            en: "The driver is friendly and courteous"
+                            fr: "Le chauffeur est sympathique et courtois"
+                            ar: "السائق ودود ومهذب"
+                          icon: "https://storage.googleapis.com/ysr-mobility-stg-pricing-dashboard/driver-insights/rev-1741629974153-2960-1750947879952.png"
+                          category: "fourAndFive"
+                          foregroundColor: "#FB2576"
+                          backgroundColor: "#FFE6E1"
+                          count: 14
+                without-data:
+                  summary: Example with driver insights
+                  value:
+                    success: true
+                    message: "Driver insights successfully retrieved"
+                    data:
+                      numberOfRides: 2653
+                      driverJoinedAt: "2017-08-22T16:35:16.997Z"
+                      daysSinceDriverJoined: 2996
+                      driverApprovedForTripsAt: null
+                      daysSinceDriverApproved: null
+                      driverInsights: []
+        "404":
+          description: Not found
+          content:
+            application/json:
+              examples:
+                driver_not_found:
+                  summary: Driver not found error
+                  value:
+                    success: false
+                    message: "Driver not found"
+                    errorMessageKey: "DRIVER_NOT_FOUND"
+        "500":
+          description: Server error
+          content:
+            application/json:
+              examples:
+                server_error:
+                  summary: Internal server error
+                  value:
+                    success: false
+                    message: "Error retrieving driver insights"
+                    errorMessageKey: "ERROR_DRIVER_INSIGHTS"
+
 
 components:
   securitySchemes:
